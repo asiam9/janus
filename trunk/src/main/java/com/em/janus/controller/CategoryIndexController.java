@@ -26,7 +26,7 @@ import com.em.janus.template.TemplateController;
 				"/book_index", "/book_index.xml", "/book_index.html", 
 				"/author_index", "/author_index.xml", "/author_index.html", 
 				"/series_index", "/series_index.xml", "/series_index.html", 
-				"/tag_index", "/tag_index.xml", "/tag_index.html",
+				"/tag_index", "/tag_index.xml", "/tag_index.html"
 		})
 public class CategoryIndexController extends JanusController {
 	private static final long serialVersionUID = 1L;
