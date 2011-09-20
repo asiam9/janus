@@ -30,7 +30,9 @@
 	    </content>
 	    
 	    <#list files as fi>
+	    <#if fi.mimeType??>
 	    <link href="./file?id=${book.id?c}&amp;ext=.${fi.extension?url}" type="${fi.mimeType?xml}" rel="http://opds-spec.org/acquisition" title="Download this ebook as ${fi.extension?upper_case?xml}" />
+	    </#if>
 		</#list>    
 	    <link href="./image?id=${book.id?c}" type="image/jpeg" rel="http://opds-spec.org/cover" />
 	    <link href="./image?id=${book.id?c}&amp;type=thumbnail" type="image/jpeg" rel="http://opds-spec.org/thumbnail" />        

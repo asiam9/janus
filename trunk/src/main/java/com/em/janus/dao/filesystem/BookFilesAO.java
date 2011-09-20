@@ -44,7 +44,21 @@ public enum BookFilesAO {
 			for(File file : ebooks) {
 				FileInfo info = new FileInfo();
 				info.setFile(file);
-				info.setMimeType(context.getMimeType(file.getAbsolutePath()));
+				String mimeType = context.getMimeType(file.getAbsolutePath());
+				
+				//fix for defective mime type detection based ONLY on extension. 
+				//WARNING: could provide malicious files by extension
+				if(mimeType == null || mimeType.isEmpty()) {
+					String name = file.getName();
+					String ext = name.substring(name.lastIndexOf(".")+1);
+					if("lit".equals(ext) || name.endsWith("lit")) {
+						mimeType = "application/x-ms-reader, application/x-obak";
+					} else {
+						mimeType = "binary/octet-stream";
+					}
+				}
+				
+				info.setMimeType(mimeType);
 				info.setExtension(file.getName().substring(file.getName().lastIndexOf(".")+1));	
 				
 				//add info
