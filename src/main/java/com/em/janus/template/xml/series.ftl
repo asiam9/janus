@@ -49,7 +49,9 @@
 		</content>
 		
 	    <#list book.fileInfo as fi>
+	    <#if fi.mimeType??>
 	    <link href="./file?id=${book.id?c}&amp;ext=.${fi.extension?url}" type="${fi.mimeType?xml}" rel="http://opds-spec.org/acquisition" title="Download this ebook as ${fi.extension?upper_case?xml}" />
+	    </#if>
 		</#list>    		
 		<link href="./book.xml?id=${book.id?c}&amp;mode=${mode}" type="application/atom+xml;type=entry;profile=opds-catalog" rel="alternate"/>
 		<#if mode != "aldiko">
