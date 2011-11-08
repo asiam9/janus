@@ -19,6 +19,8 @@ public enum JanusConfiguration {
 	private String basePath = "/var/books";
 	private String database = "metadata.db";
 	private List<String> ebookExtensions = new ArrayList<String>();
+	
+	private boolean useEhCache = true;
 
 	private int pageSize = 50;
 	
@@ -67,4 +69,7 @@ public enum JanusConfiguration {
 		return ebookExtensions;
 	}
 	
+	public boolean useEhCache() {
+		return this.useEhCache;
+	}
 }

@@ -6,6 +6,11 @@ import java.util.Set;
 
 public class Book extends Entity implements Comparable<Book>{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String title;
 	
 	private String sortTitle;

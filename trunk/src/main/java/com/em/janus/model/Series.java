@@ -5,6 +5,11 @@ import java.util.TreeSet;
 
 public class Series extends Entity implements Comparable<Series>{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String name;
 	
 	private String sortName;

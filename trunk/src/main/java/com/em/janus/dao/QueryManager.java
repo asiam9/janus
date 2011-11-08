@@ -5,8 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 
@@ -18,7 +20,16 @@ public enum QueryManager {
 	
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
+	private Semaphore queryLock = new Semaphore(1,true);
+	
 	public <T extends Entity> Set<T> query(IDataAccessObject<T> dao, String queryString, Object ... params) {
+		
+		try {
+			this.queryLock.acquire();
+		} catch (InterruptedException e) {
+			this.logger.error("An error occured acquiring the query lock.",e);
+			return new HashSet<T>();
+		}
 		
 		Set<T> results = new TreeSet<T>();
 		
@@ -85,6 +96,8 @@ public enum QueryManager {
 		} catch (SQLException e) {
 			this.logger.error("Could not close connection.",e);
 		}	
+		
+		this.queryLock.release();
 		
 		return results;		
 	}

@@ -3,6 +3,11 @@ package com.em.janus.model;
 
 public class Tag extends Entity implements Comparable<Tag> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String name;
 
 	public String getName() {
