@@ -2,7 +2,10 @@ package com.em.janus.controller;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +57,8 @@ public class SeriesController extends JanusController {
 		elements.put("series", series);
 		elements.put("mode", mode);
 		
-		Set<Book> books = DAOFactory.INSTANCE.getDAO(Book.class).getBySeriesId(series.getId());
+		List<Book> books = new ArrayList<Book>(DAOFactory.INSTANCE.getDAO(Book.class).getBySeriesId(series.getId()));
+		Collections.sort(books);
 		for(Book book : books) {
 			book.getFileInfo().addAll(BookFilesAO.INSTANCE.getEbookFiles(request.getServletContext(), book));
 		}		
