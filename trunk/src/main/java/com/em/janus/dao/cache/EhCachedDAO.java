@@ -26,16 +26,20 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 	
 	private final Ehcache cache;
 	
+	private final Ehcache queryCache;
+	
 	public EhCachedDAO(Class<T> primaryType, IDataAccessObject<T> daoToCache) {
 		//decorate the static dao
 		this.dao = daoToCache;
 
 		//Decisions based on output class
 		this.primaryType = primaryType;
-		String cacheName = this.primaryType.getName() + "_cache";
+		String cacheName = this.primaryType.getName() + "_object_cache";
+		String queryCacheName = this.primaryType.getName() + "_query_cache";
 		
 		//get cache (from manager)
 		this.cache = EhCacheManager.getCache(cacheName);
+		this.queryCache = EhCacheManager.getCache(queryCacheName);
 		
 		//register to be managed for eviction notices
 		CacheManager.INSTANCE.register(this);
@@ -49,7 +53,9 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 		if(this.cache != null && this.cache.getSize() > 0 && this.cache.getKeys() != null && !this.cache.getKeys().isEmpty()) {
 			result = new HashSet<T>();
 			for(Object key : this.cache.getKeys()) {
-				Object item = this.get(key);
+				Object item = this.get(this.cache, key);
+				
+				//only entity items should be returned.  this may be legacy now that cache and queryCache are seperate.
 				if(item instanceof Entity) {
 					result.add((T)item);
 				}
@@ -58,7 +64,7 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 			result = this.dao.get();
 			//cache result since it wasn't in the cache
 			for(T item : result) {
-				this.put(item);
+				this.put(this.cache, item);
 			}
 		}
 		
@@ -104,7 +110,7 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 		//create key
 		String key = proxy.key();
 		
-		Object found = this.get(key);
+		Object found = this.get(this.queryCache, key);
 		
 		Set<T> result = null;		
 		
@@ -117,25 +123,25 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 				keySet.add(item.getId());
 				
 				//add item to cache (ensure item is in cache)
-				this.put(item);
+				this.put(this.cache, item);
 			}
 			
 			//add whole key set to map
 			Element keySetElement = new Element(key, keySet);
-			this.cache.put(keySetElement);			
+			this.queryCache.put(keySetElement);			
 		} else {
 			result = new HashSet<T>();
 			
 			//get from key
-			Object value = this.get(key);
+			Object value = this.get(this.queryCache, key);
 			
 			Set<Object> keySet = null;
 			
-			if(value instanceof Set) {
+			if(value != null && value instanceof Set) {
 				keySet = (Set<Object>)value; 
 				
 				for(Object itemKey : keySet) {
-					Object itemValue = this.get(itemKey);
+					Object itemValue = this.get(this.cache, itemKey);
 					result.add((T)itemValue);				
 				}
 			} 
@@ -144,13 +150,13 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 		return result;		
 	}
 	
-	private void put(T item) {
+	private void put(Ehcache cache, T item) {
 		if(item == null) return;
-		this.cache.put(new Element(item.getId(), item));
+		cache.put(new Element(item.getId(), item));
 	}
 
-	private Object get(Object key) {
-		Element got = this.cache.get(key);
+	private Object get(Ehcache cache, Object key) {
+		Element got = cache.get(key);
 		if(got == null) {
 			return null;
 		}
