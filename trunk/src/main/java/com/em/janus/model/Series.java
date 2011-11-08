@@ -19,7 +19,7 @@ public class Series extends Entity implements Comparable<Series>{
 	private Set<Tag> tags = new TreeSet<Tag>();
 	
 	private Set<Author> authors = new TreeSet<Author>();
-
+	
 	public String getName() {
 		return name;
 	}

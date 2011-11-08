@@ -38,7 +38,7 @@
 	</#list>
 	
 	<#if mode!="json">
-	<link href="./books.xml?sort=${sort}&amp;index=${index?c}&amp;size=${size?c}&amp;mode=${mode}&amp;starts=${starts!""}" type="application/atom+xml;type=feed;profile=opds-catalog" rel="next" title="next page"/>
+	<link href="./books.xml?tag=${tag?c!0}&amp;sort=${sort}&amp;index=${index?c}&amp;size=${size?c}&amp;mode=${mode}&amp;starts=${starts!""}" type="application/atom+xml;type=feed;profile=opds-catalog" rel="next" title="next page"/>
 	</#if>
 	
 </feed>

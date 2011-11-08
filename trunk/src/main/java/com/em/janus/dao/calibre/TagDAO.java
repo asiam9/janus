@@ -34,7 +34,11 @@ public enum TagDAO implements IDataAccessObject<Tag> {
 	
 	@Override
 	public Set<Tag> queryStartsWith(String property, String prefix) {
-		return this.simpleSearch("? like '?%'", property, prefix);	}
+		if(!prefix.endsWith("%")) {
+			prefix = prefix + "%";
+		}
+		return this.simpleSearch(property + " like ?", prefix);
+	}
 
 	private Set<Tag> simpleSearch(String whereClause, Object ... parameters) {
 		//basic clause

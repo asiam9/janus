@@ -41,6 +41,15 @@ public class ListBooksController extends JanusController {
 		String sort = request.getParameter("sort");
 		if(sort == null || sort.isEmpty()) sort = "title";
 		
+		//get potential tag id
+		String tagIdString = request.getParameter("tag");
+		int tagId = 0;
+		try {
+			tagId = Integer.parseInt(tagIdString);
+		} catch (Exception ex) {
+			tagId = 0;
+		}
+		
 		//get index and size parameters
 		String sizeString = request.getParameter("size");
 		String indexString = request.getParameter("index");
@@ -69,7 +78,9 @@ public class ListBooksController extends JanusController {
 		
 		//get books
 		Set<Book> books = null;
-		if(startsWith == null) {
+		if(tagId > 0) {
+			books = DAOFactory.INSTANCE.getDAO(Book.class).getByTagId(tagId);
+		} else if(startsWith == null) {
 			books = DAOFactory.INSTANCE.getDAO(Book.class).get();
 		} else if("OTHER".equalsIgnoreCase(startsWith)) {
 			books = DAOFactory.INSTANCE.getDAO(Book.class).get();
@@ -150,6 +161,9 @@ public class ListBooksController extends JanusController {
 		
 		//sorting
 		elements.put("sort",sort);
+		
+		//tag
+		elements.put("tag",tagId);
 		
 		//starts with
 		elements.put("starts",startsWith);

@@ -30,6 +30,11 @@
 		<#if sort=="series">
 		<content type="text">Author of ${author.series?size} series.</content>
 		</#if>
+		
+		<#if author.books?size &gt; 0>
+		    <link href="./image?id=${author.books?first.id?c}" type="image/jpeg" rel="http://opds-spec.org/cover" />
+		    <link href="./image?id=${author.books?first.id?c}&amp;type=thumbnail" type="image/jpeg" rel="http://opds-spec.org/thumbnail" />
+	    </#if>  
 
 		<link href="./author.xml?id=${author.id?c}&amp;mode=${mode}" type="application/atom+xml;type=feed;profile=opds-catalog"/>
 		<link href="" type="image/png" rel="http://opds-spec.org/thumbnail"/>	
@@ -37,6 +42,6 @@
 	</#list>
 	
 	<#if sort=="books" && mode!="json">
-	<link href="./authors.xml?sort=${sort}&amp;index=${index?c}&amp;size=${size?c}&amp;mode=${mode}" type="application/atom+xml;type=feed;profile=opds-catalog" rel="next" title="next page"/>
+	<link href="./authors.xml?tag=${tag?c!0}&amp;sort=${sort}&amp;index=${index?c}&amp;size=${size?c}&amp;mode=${mode}" type="application/atom+xml;type=feed;profile=opds-catalog" rel="next" title="next page"/>
 	</#if>
 </feed>

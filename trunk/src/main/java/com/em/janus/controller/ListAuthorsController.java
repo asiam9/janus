@@ -44,12 +44,21 @@ public class ListAuthorsController extends JanusController {
 		} catch (Exception ex) {
 			seriesId = 0;
 		}
+		
+		//get potential tag id
+		String tagIdString = request.getParameter("tag");
+		int tagId = 0;
+		try {
+			tagId = Integer.parseInt(tagIdString);
+		} catch (Exception ex) {
+			tagId = 0;
+		}
 	
 		//sort mode
 		String sort = request.getParameter("sort");
 		//sort is a potential SQL injection problem.  it must equal "name", "books", "tags", "series", or "sort"
 		//sort by name when showing only series authors
-		if(seriesId > 0 || sort == null || sort.isEmpty() || (!"books".equals(sort) && !"tags".equals(sort) && !"series".equals(sort) && !"name".equals(sort) && !"sort".equals(sort))) {
+		if(seriesId > 0 || tagId > 0 || sort == null || sort.isEmpty() || (!"books".equals(sort) && !"tags".equals(sort) && !"series".equals(sort) && !"name".equals(sort) && !"sort".equals(sort))) {
 			sort = "name";
 		}
 		
@@ -63,7 +72,7 @@ public class ListAuthorsController extends JanusController {
 		//create null authors list
 		List<Author> authors = null;
 		
-		if(seriesId == 0 && (starts.isEmpty() || "books".equals(sort) || "tags".equals(sort) || "series".equals(sort))) {			
+		if(seriesId == 0 && tagId == 0 && (starts.isEmpty() || "books".equals(sort) || "tags".equals(sort) || "series".equals(sort))) {			
 			//get index and size parameters
 			String sizeString = request.getParameter("size");
 			String indexString = request.getParameter("index");
@@ -133,6 +142,8 @@ public class ListAuthorsController extends JanusController {
 			//if we're showing a series, then only get those authors
 			if(seriesId > 0) {
 				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).getBySeriesId(seriesId));
+			} else if(tagId > 0) {
+				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).getByTagId(tagId));
 			} else {
 				//otherwise, get all authors
 				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).queryStartsWith(sort, starts));
@@ -159,6 +170,7 @@ public class ListAuthorsController extends JanusController {
 		elements.put("authors",authors);
 		elements.put("mode",mode);
 		elements.put("sort",sort);
+		elements.put("tag",tagId);
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/authors.ftl");		
