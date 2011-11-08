@@ -34,7 +34,7 @@ public enum BookDAO implements IDataAccessObject<Book>{
 	}
 	
 	public Set<Book> getByTagId(int tagId) {
-		return this.query("select " + this.selectFields + " from books b join books_tags_link t on t.book=t.id where t.tag=?",tagId);
+		return this.query("select " + this.selectFields + " from books b join books_tags_link t on t.book=b.id where t.tag=?",tagId);
 	}
 	
 	@Override

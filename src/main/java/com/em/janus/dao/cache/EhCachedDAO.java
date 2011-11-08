@@ -24,8 +24,14 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 	
 	private IDataAccessObject<T> dao = null;
 	
+	/**
+	 * Object cache.  Caches entities of type T.
+	 */
 	private final Ehcache cache;
 	
+	/**
+	 * Query cache.  Provides a mapping from a query (book, author, etc) to a list of entity ids that can be looked up in the object cache.
+	 */
 	private final Ehcache queryCache;
 	
 	public EhCachedDAO(Class<T> primaryType, IDataAccessObject<T> daoToCache) {
@@ -55,7 +61,7 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 			for(Object key : this.cache.getKeys()) {
 				Object item = this.get(this.cache, key);
 				
-				//only entity items should be returned.  this may be legacy now that cache and queryCache are seperate.
+				//only entity items should be returned.  this may be legacy now that cache and queryCache are separate.
 				if(item instanceof Entity) {
 					result.add((T)item);
 				}
@@ -114,6 +120,7 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 		
 		Set<T> result = null;		
 		
+		//no cached result means that the dao will need to be queried through the object type proxy
 		if(found == null) {
 			result = proxy.get();
 			
@@ -142,7 +149,11 @@ public class EhCachedDAO <T extends Entity> implements IDataAccessObject<T>, ICa
 				
 				for(Object itemKey : keySet) {
 					Object itemValue = this.get(this.cache, itemKey);
-					result.add((T)itemValue);				
+					
+					//trying for type safety
+					if(itemValue instanceof Entity) {
+						result.add((T)itemValue);
+					}
 				}
 			} 
 		}

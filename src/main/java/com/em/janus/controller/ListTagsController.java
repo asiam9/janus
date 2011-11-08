@@ -19,15 +19,16 @@ import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
-import com.em.janus.model.sorting.SeriesBookCountComparator;
-import com.em.janus.model.sorting.SeriesRecentlyAddedComparator;
+import com.em.janus.model.Tag;
+import com.em.janus.model.sorting.TagBookCountComparator;
+import com.em.janus.model.sorting.TagSeriesCountComparator;
 import com.em.janus.template.TemplateController;
 
 /**
  * Servlet implementation class ListAuthorsController
  */
-@WebServlet(description = "lists series based on given criteria", urlPatterns = { "/series_list", "/series_list.xml", "/series_list.html" })
-public class ListSeriesController extends JanusController {
+@WebServlet(description = "lists tags based on given criteria", urlPatterns = { "/tag_list", "/tag_list.xml", "/tag_list.html" })
+public class ListTagsController extends JanusController {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -35,17 +36,8 @@ public class ListSeriesController extends JanusController {
 	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//sort mode
 		String sort = request.getParameter("sort");
-		//sort is a potential SQL injection problem.  it must equal "name" or "books" or "date"
-		if(sort == null || sort.isEmpty() || (!"books".equals(sort) && !"date".equals(sort))) sort = "name";
-		
-		//get potential tag id
-		String tagIdString = request.getParameter("tag");
-		int tagId = 0;
-		try {
-			tagId = Integer.parseInt(tagIdString);
-		} catch (Exception ex) {
-			tagId = 0;
-		}
+		//sort is a potential SQL injection problem.  it must equal "name" or "books" or "series"
+		if(sort == null || sort.isEmpty() || (!"books".equals(sort) && !"series".equals(sort))) sort = "name";
 
 		//starts with
 		String starts = request.getParameter("starts");
@@ -55,9 +47,9 @@ public class ListSeriesController extends JanusController {
 		Map<String, Object> elements = new HashMap<String, Object>();
 
 		//create null authors list
-		List<Series> series = null;
+		List<Tag> tags = null;
 		
-		if(starts.isEmpty() || "books".equals(sort) || "date".equals(sort)) {			
+		if(starts.isEmpty() || "books".equals(sort) || "series".equals(sort)) {			
 			//get index and size parameters
 			String sizeString = request.getParameter("size");
 			String indexString = request.getParameter("index");
@@ -78,48 +70,44 @@ public class ListSeriesController extends JanusController {
 			}
 			
 			//get and chop and sort
-			if(tagId > 0) {
-				series = new ArrayList<Series>(DAOFactory.INSTANCE.getDAO(Series.class).getByTagId(tagId));
-			} else { 
-				series = new ArrayList<Series>(DAOFactory.INSTANCE.getDAO(Series.class).get());
-			}
+			tags = new ArrayList<Tag>(DAOFactory.INSTANCE.getDAO(Tag.class).get());
 			
-			//get books for each author
-			if("books".equals(sort) || "date".equals(sort)) {
-				for(Series s : series) {
-					s.setBooks(DAOFactory.INSTANCE.getDAO(Book.class).getBySeriesId(s.getId()));
-				}
+			//grab books and authors for counts
+			for(Tag t : tags) {
+				t.setBooks(DAOFactory.INSTANCE.getDAO(Book.class).getByTagId(t.getId()));
+				t.setAuthors(DAOFactory.INSTANCE.getDAO(Author.class).getByTagId(t.getId()));
+				t.setSeries(DAOFactory.INSTANCE.getDAO(Series.class).getByTagId(t.getId()));
 			}
 			
 			//create default comparator
-			Comparator<Series> comparator = null;
+			Comparator<Tag> comparator = null;
 			if("books".equals(sort)) {
-				comparator = new SeriesBookCountComparator();
-			} else if("date".equals(sort)) {
-				comparator = new SeriesRecentlyAddedComparator();
+				comparator = new TagBookCountComparator();
+			} else if("series".equals(sort)) {
+				comparator = new TagSeriesCountComparator();
 			}
 			
 			//only if a comparator is provided.  this is used to keep the natural sort
 			//when no "sort" parameter is provided
 			if(comparator != null) {
 				//sort using comparator
-				Collections.sort(series,comparator);
+				Collections.sort(tags,comparator);
 			} else {
-				Collections.sort(series);
+				Collections.sort(tags);
 			}
 				
 			//grab size
 			int end = index + size;
 			int nextIndex = index;
-			if(end > series.size()) {
-				end = series.size();
+			if(end > tags.size()) {
+				end = tags.size();
 			} else {
 				nextIndex += size;
 			}
 			
 			//chop the list, when not in json mode
 			if(!"json".equals(mode)){
-				series = series.subList(index, end);
+				tags = tags.subList(index, end);
 			}
 			
 			//update size with previously calculated (in bounds) next index
@@ -130,25 +118,25 @@ public class ListSeriesController extends JanusController {
 			elements.put("size",size);			
 		} else {
 			//get authors
-			series = new ArrayList<Series>(DAOFactory.INSTANCE.getDAO(Series.class).queryStartsWith(sort, starts));
+			tags = new ArrayList<Tag>(DAOFactory.INSTANCE.getDAO(Tag.class).queryStartsWith(sort, starts));
 			//use only one type of "natural" sort
-			Collections.sort(series);
-		}
-		
-		//grab books for counts
-		for(Series s : series) {
-			s.setBooks(DAOFactory.INSTANCE.getDAO(Book.class).getBySeriesId(s.getId()));
-			s.setAuthors(DAOFactory.INSTANCE.getDAO(Author.class).getBySeriesId(s.getId()));
-			//s.setTags(TagDAO.INSTANCE.getBySeriesId(s.getId()));
+			Collections.sort(tags);
+			
+			//grab books and authors for counts
+			for(Tag t : tags) {
+				t.setBooks(DAOFactory.INSTANCE.getDAO(Book.class).getByTagId(t.getId()));
+				t.setAuthors(DAOFactory.INSTANCE.getDAO(Author.class).getByTagId(t.getId()));
+				t.setSeries(DAOFactory.INSTANCE.getDAO(Series.class).getByTagId(t.getId()));
+			}
 		}
 		
 		//put elements into template map
-		elements.put("series",series);
+		elements.put("tags",tags);
 		elements.put("mode",mode);
 		elements.put("sort",sort);
 		
 		//process template into output stream
-		TemplateController.INSTANCE.process(out, elements, "xml/series_list.ftl");		
+		TemplateController.INSTANCE.process(out, elements, "xml/tag_list.ftl");		
 	}
        
  
