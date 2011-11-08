@@ -5,6 +5,11 @@ import java.util.Set;
 
 public class Author extends Entity implements Comparable<Author>{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String name;
 	
 	private String sortName;

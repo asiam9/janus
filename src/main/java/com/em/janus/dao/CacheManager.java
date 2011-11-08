@@ -3,20 +3,20 @@ package com.em.janus.dao;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.em.janus.dao.cache.CachedDAO;
+import com.em.janus.dao.cache.ICachedDAO;
 
 public enum CacheManager {
 
 	INSTANCE;
 	
-	private Set<CachedDAO<?>> cachedDaoProviders = new HashSet<CachedDAO<?>>();
+	private Set<ICachedDAO> cachedDaoProviders = new HashSet<ICachedDAO>();
 	
-	public void register(CachedDAO<?> cachedDAO) {
+	public void register(ICachedDAO cachedDAO) {
 		this.cachedDaoProviders.add(cachedDAO);
 	}
 	
 	public void evict() {
-		for(CachedDAO<?> cached : this.cachedDaoProviders) {
+		for(ICachedDAO cached : this.cachedDaoProviders) {
 			cached.evict();
 		}
 	}
@@ -26,7 +26,7 @@ public enum CacheManager {
 	}
 
 	public void init() {
-		for(CachedDAO<?> cached : this.cachedDaoProviders) {
+		for(ICachedDAO cached : this.cachedDaoProviders) {
 			cached.init();
 		}		
 	}

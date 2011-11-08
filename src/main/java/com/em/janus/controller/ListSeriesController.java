@@ -91,6 +91,8 @@ public class ListSeriesController extends JanusController {
 			if(comparator != null) {
 				//sort using comparator
 				Collections.sort(series,comparator);
+			} else {
+				Collections.sort(series);
 			}
 				
 			//grab size

@@ -4,6 +4,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
+import com.em.janus.dao.cache.EhCacheManager;
 import com.em.janus.watcher.DatabaseWatcher;
 
 /**
@@ -11,14 +12,14 @@ import com.em.janus.watcher.DatabaseWatcher;
  *
  */
 @WebListener
-public class StartupDatabaseWatcher implements ServletContextListener {
+public class ApplicationStateListener implements ServletContextListener {
 
 	private Thread watcherThread = null;
 	
     /**
      * Default constructor. 
      */
-    public StartupDatabaseWatcher() {
+    public ApplicationStateListener() {
     	//get the watcher thread
     	this.watcherThread = new Thread(DatabaseWatcher.INSTANCE);
     }
@@ -45,6 +46,9 @@ public class StartupDatabaseWatcher implements ServletContextListener {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		//close the query cache
+		EhCacheManager.close();
     }
 	
 }

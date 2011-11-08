@@ -18,7 +18,7 @@ import com.em.janus.model.Entity;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
 
-public class CachedDAO<T extends Entity> implements IDataAccessObject<T>{
+public class NaiveCachedDAO<T extends Entity> implements IDataAccessObject<T>, ICachedDAO{
 
 	private IDataAccessObject<T> dao = null;
 	
@@ -37,7 +37,7 @@ public class CachedDAO<T extends Entity> implements IDataAccessObject<T>{
 	
 	private Map<String, Set<T>> startsWith = new HashMap<String, Set<T>>();
 	
-	public CachedDAO(Class<T> primaryType, IDataAccessObject<T> daoToCache) {
+	public NaiveCachedDAO(Class<T> primaryType, IDataAccessObject<T> daoToCache) {
 		//decorate the static dao
 		this.dao = daoToCache;
 		

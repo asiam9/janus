@@ -4,7 +4,7 @@
   <env-entry>
     <env-entry-name>basePath</env-entry-name>
     <env-entry-type>java.lang.String</env-entry-type>
-    <env-entry-value>/home/chris/Desktop/books</env-entry-value>
+    <env-entry-value>D:/Media/books</env-entry-value>
   </env-entry>
   <env-entry>
     <env-entry-name>databaseName</env-entry-name>

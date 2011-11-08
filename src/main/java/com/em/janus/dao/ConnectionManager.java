@@ -23,9 +23,9 @@ public enum ConnectionManager {
 		//load the driver
 		try {
 			Class.forName(sqlDriverName);			
-			logger.debug("Loaded \"{}\" driver.",sqlDriverName);
+			this.logger.debug("Loaded \"{}\" driver.",sqlDriverName);
 		} catch (Exception ex) {
-			logger.error("Could not load the \"{}\" driver.",sqlDriverName);		
+			this.logger.error("Could not load the \"{}\" driver.",sqlDriverName);		
 		}
 	}
 	
@@ -51,4 +51,7 @@ public enum ConnectionManager {
 		return connection;
 	}
 	
+	public void close() {
+		
+	}
 }
