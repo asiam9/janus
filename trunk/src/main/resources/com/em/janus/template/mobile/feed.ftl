@@ -3,6 +3,9 @@
 	<head>
 		<title>${feed.title[0]?html}</title>
 		
+		<!-- mobile viewport -->
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		
 		<!-- jquery -->
 		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.0rc2.min.css" />
 		<script src="./jquery/jquery-1.7.min.js"></script>

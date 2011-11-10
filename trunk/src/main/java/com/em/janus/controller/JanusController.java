@@ -86,7 +86,7 @@ public abstract class JanusController extends HttpServlet {
 				mode = "fbreader";
 			} else if(userAgent.contains("opds")) {
 				mode = "opds";
-			} else if((userAgent.contains("safari") && userAgent.contains("iP") && userAgent.contains("mobile")) || userAgent.contains("android")) {
+			} else if((userAgent.contains("safari") && userAgent.contains("ip") && userAgent.contains("mobile")) || userAgent.contains("android")) {
 				mode = "mobile";
 			} else {
 				mode = "none";
@@ -249,7 +249,7 @@ public abstract class JanusController extends HttpServlet {
 		long end = (new Date()).getTime();
 		
 		//finally output for metrics
-		this.logger.info("Servlet took: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent={})",new Object[]{Long.toString((end-start)),path,request.getQueryString(),mode,outputType.toString(),type,userAgent});
+		this.logger.info("Servlet took: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent=\"{}\")",new Object[]{Long.toString((end-start)),path,request.getQueryString(),mode,outputType.toString(),type,userAgent});
 	}
 
 	protected abstract void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException;	
