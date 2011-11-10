@@ -1,0 +1,26 @@
+.cover-image {
+	max-width: 100%; 
+	padding-bottom: 30px;
+}
+
+@media all and (min-width: 650px){
+		.cover-image {
+			max-width: 100%; 
+			padding-bottom: 30px;
+		}
+	
+        .content-secondary {
+                text-align: left;
+                float: left;
+                width: 45%;
+                background: none;
+        }
+
+        .content-primary {
+                width: 45%;
+                float: right;
+                margin-top: 30px;
+                margin-right: 1%;
+                padding-right: 1%;
+        }
+}

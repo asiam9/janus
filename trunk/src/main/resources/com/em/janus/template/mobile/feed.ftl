@@ -4,12 +4,16 @@
 		<title>${feed.title[0]?html}</title>
 		
 		<!-- mobile viewport -->
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"> 
 		
 		<!-- jquery -->
 		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.0rc2.min.css" />
 		<script src="./jquery/jquery-1.7.min.js"></script>
 		<script src="./jquery/mobile/jquery.mobile-1.0rc2.min.js"></script>
+		
+		<!-- janus style -->
+		<link rel="stylesheet" href="./style/mobile/general.css" />
+		<link rel="stylesheet" href="./style/mobile/feed.css" />
 	</head>
 	<body>
 		<div data-role="page" id="content-page" data-add-back-btn="true" data-theme="b">
@@ -59,7 +63,7 @@
 				</div>
 			</div>
 			
-			<div data-role="footer"> 
+			<div class="janus-footer" data-role="footer"> 
 			</div>
 		</div>
 	

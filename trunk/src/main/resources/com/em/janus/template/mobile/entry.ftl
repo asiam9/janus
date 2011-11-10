@@ -4,33 +4,16 @@
 		<title>${feed.entry[0].title[0]?html}</title>
 		
 		<!-- mobile viewport -->
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> 
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"> 
 				
 		<!-- jquery -->
 		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.0rc2.min.css" />
 		<script src="./jquery/jquery-1.7.min.js"></script>
 		<script src="./jquery/mobile/jquery.mobile-1.0rc2.min.js"></script>
 		
-        <style>
-	        @media all and (min-width: 650px){
-	                .content-secondary {
-	                        text-align: left;
-	                        float: left;
-	                        width: 45%;
-	                        background: none;
-	                }
-	
-	                .content-primary {
-	                        width: 45%;
-	                        float: right;
-	                        margin-top: 30px;
-	                        margin-right: 1%;
-	                        padding-right: 1%;
-	                }
-	        }
-        </style>
-		
-		
+		<!-- janus style -->
+		<link rel="stylesheet" href="./style/mobile/general.css" />
+		<link rel="stylesheet" href="./style/mobile/entry.css" />
 	</head>
 	<body>
 		<div data-role="page" id="content-page" data-add-back-btn="true" data-theme="b">
@@ -47,7 +30,7 @@
 					<!-- cover -->
 					<#assign cover=feed.entry[0]["link[contains(@rel,'cover')]"]/>
 					<#if cover?size &gt; 0 && cover[0].@href?length &gt; 1>
-					<img style='max-width: 100%; padding-bottom: 10px;' id="cover-image" src="${cover[0].@href?html}"/>
+					<img class="cover-image" src="${cover[0].@href?html}"/>
 					</#if>
 				
 				</div><!--/content-primary-->
@@ -57,7 +40,7 @@
 					<#assign files=feed.entry[0]["link[contains(@rel,'acquisition')]"]/>
 					<#assign related=feed.entry[0]["link[contains(@rel,'related')]"]/>
 		
-					<ul data-role="listview">	
+					<ul data-role="listview" data-inset="true">	
 					<#if files?size &gt; 0>		
 					<!-- files -->
 					<li data-role="list-divider">Downloads</li>		
@@ -86,7 +69,7 @@
 				</div>
 			</div>		
 			
-			<div data-role="footer"> 
+			<div class="janus-footer" data-role="footer"> 
 			</div>
 		</div>
 	</body>
