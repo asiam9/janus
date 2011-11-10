@@ -6,6 +6,9 @@
   <packaging>war</packaging>
   <name>janus</name>
   <description>real time updated web catalog for Calibre</description>
+  <properties>
+  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
   	<dependency>
   		<groupId>org.freemarker</groupId>

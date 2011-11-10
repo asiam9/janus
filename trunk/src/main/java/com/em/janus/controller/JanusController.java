@@ -86,6 +86,8 @@ public abstract class JanusController extends HttpServlet {
 				mode = "fbreader";
 			} else if(userAgent.contains("opds")) {
 				mode = "opds";
+			} else if((userAgent.contains("safari") && userAgent.contains("iP") && userAgent.contains("mobile")) || userAgent.contains("android")) {
+				mode = "mobile";
 			} else {
 				mode = "none";
 			}
@@ -109,8 +111,13 @@ public abstract class JanusController extends HttpServlet {
 		if("stanza".equals(mode) || "aldiko".equals(mode) || "fbreader".equals(mode)  || "opds".equals(mode)) {
 			outputType = OutputType.FEED;
 		} else if("json".equals(mode) && !OutputType.HTML.equals(outputType)) {
-			//cant to .html and json
+			//can't do .html and json
 			outputType = OutputType.JSON;
+		} else if("mobile".equals(mode)){
+			//mobile browsers that weren't detected as a feed based reader (aldiko, stanza, etc) should become mobile output html
+			outputType = OutputType.HTML;
+		} else {
+			//todo: should output type equal html here?  signifies that we don't know what type it is?
 		}
 		
 		//output writer
@@ -195,9 +202,17 @@ public abstract class JanusController extends HttpServlet {
 				Writer htmlOut = new StringWriter();
 				//hit template
 				if("book".equals(type)){
-					TemplateController.INSTANCE.process(htmlOut, root, "html/entry.ftl");
+					if("mobile".equals(mode)) {
+						TemplateController.INSTANCE.process(htmlOut, root, "mobile/entry.ftl");
+					} else {
+						TemplateController.INSTANCE.process(htmlOut, root, "simple/entry.ftl");
+					}
 				} else {
-					TemplateController.INSTANCE.process(htmlOut, root, "html/feed.ftl");
+					if("mobile".equals(mode)) {
+						TemplateController.INSTANCE.process(htmlOut, root, "mobile/feed.ftl");
+					} else {
+						TemplateController.INSTANCE.process(htmlOut, root, "simple/feed.ftl");
+					}
 				}
 				//recover string from output writer
 				outputHTML = htmlOut.toString();
@@ -211,6 +226,17 @@ public abstract class JanusController extends HttpServlet {
 				output = outputHTML;
 			}
 		}
+		
+		//responses to make no-cache happen, causes problems with jQuery
+		// Set to expire far in the past.
+		response.setHeader("Expires", "Mon, 28 March 1983 12:00:00 GMT");
+		// Set standard HTTP/1.1 no-cache headers.
+		response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+		// Set IE extended HTTP/1.1 no-cache headers (use addHeader).
+		response.addHeader("Cache-Control", "post-check=0, pre-check=0");
+		// Set standard HTTP/1.0 no-cache header.
+		response.setHeader("Pragma", "no-cache");		
+		
 		//set output size in bytes
 		response.setContentLength(output.getBytes().length);
 		
@@ -223,7 +249,7 @@ public abstract class JanusController extends HttpServlet {
 		long end = (new Date()).getTime();
 		
 		//finally output for metrics
-		this.logger.info("Servlet took: {}ms (path={}, query=\"{}\", output={}, type={})",new Object[]{Long.toString((end-start)),path,request.getQueryString(),outputType.toString(),type});
+		this.logger.info("Servlet took: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent={})",new Object[]{Long.toString((end-start)),path,request.getQueryString(),mode,outputType.toString(),type,userAgent});
 	}
 
 	protected abstract void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException;	
