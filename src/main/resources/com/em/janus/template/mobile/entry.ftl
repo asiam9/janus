@@ -26,7 +26,6 @@
 					<!-- cover -->
 					<#assign cover=feed.entry[0]["link[contains(@rel,'cover')]"]/>
 					<#if cover?size &gt; 0 && cover[0].@href?length &gt; 1>
-					<!-- todo: replace image max-width with something browser/viewport/orientation specific, in preload event maybe? -->
 					<center><img style='max-width: 320px' id="cover-image" src="${cover[0].@href?html}"/></center>
 					</#if>
 					
