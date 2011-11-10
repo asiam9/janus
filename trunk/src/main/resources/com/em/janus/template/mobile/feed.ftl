@@ -12,7 +12,7 @@
 		<script src="./jquery/mobile/jquery.mobile-1.0rc2.min.js"></script>
 	</head>
 	<body>
-		<div data-role="page" id="content-page" data-add-back-btn="true">
+		<div data-role="page" id="content-page" data-add-back-btn="true" data-theme="b">
 		
 			<!-- jquery mobile header bar -->
 			<div data-role="header"> 
@@ -57,6 +57,9 @@
 						
 					</ul>
 				</div>
+			</div>
+			
+			<div data-role="footer"> 
 			</div>
 		</div>
 	

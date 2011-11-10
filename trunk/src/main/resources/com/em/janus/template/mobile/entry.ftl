@@ -12,7 +12,7 @@
 		<script src="./jquery/mobile/jquery.mobile-1.0rc2.min.js"></script>
 	</head>
 	<body>
-		<div data-role="page" id="content-page" data-add-back-btn="true">
+		<div data-role="page" id="content-page" data-add-back-btn="true" data-theme="b">
 		
 			<!-- jquery mobile header bar -->
 			<div data-role="header"> 
@@ -20,46 +20,52 @@
 				<a href="./index.html?mode=mobile" data-icon="home" data-iconpos="notext" data-direction="reverse" class="ui-btn-right jqm-home">Home</a>
 			</div> 
 			
-			<!-- cover -->
-			<#assign cover=feed.entry[0]["link[contains(@rel,'cover')]"]/>
-			<#if cover?size &gt; 0 && cover[0].@href?length &gt; 1>
-			<center><img src="${cover[0].@href?html}"/></center>
-			</#if>
+			<div data-role="content" data-add-back-btn="true">
+				<div class="content-primary">	
 			
-			<!-- todo: details -->
-
-			<#assign files=feed.entry[0]["link[contains(@rel,'acquisition')]"]/>
-			<#assign related=feed.entry[0]["link[contains(@rel,'related')]"]/>
-
-			<ul data-role="listview">	
-			<#if files?size &gt; 0>		
-			<!-- files -->
-			<li data-role="list-divider">Downloads</li>		
-			<#list files as file>
-				<li><a href="${file.@href}" rel="external"><p>${file.@title}</p></a></li>
-			</#list>
-			</#if>
+					<!-- cover -->
+					<#assign cover=feed.entry[0]["link[contains(@rel,'cover')]"]/>
+					<#if cover?size &gt; 0 && cover[0].@href?length &gt; 1>
+					<!-- todo: replace image max-width with something browser/viewport/orientation specific, in preload event maybe? -->
+					<center><img style='max-width: 320px' id="cover-image" src="${cover[0].@href?html}"/></center>
+					</#if>
+					
+					<!-- todo: details -->
+		
+					<#assign files=feed.entry[0]["link[contains(@rel,'acquisition')]"]/>
+					<#assign related=feed.entry[0]["link[contains(@rel,'related')]"]/>
+		
+					<ul data-role="listview">	
+					<#if files?size &gt; 0>		
+					<!-- files -->
+					<li data-role="list-divider">Downloads</li>		
+					<#list files as file>
+						<li><a href="${file.@href}" rel="external"><p>${file.@title}</p></a></li>
+					</#list>
+					</#if>
+					
+					<#if feed.entry[0].author?size &gt; 0> 
+					<!-- authors -->
+					<li data-role="list-divider">Author(s) of this book</li>
+					<#list feed.entry[0].author as author>
+						<li><a href="./${author.uri?replace(".xml",".html")?html}"><p>${author.name}</p></a></li>
+					</#list>
+					</#if>
+					
+					<#if related?size &gt; 0>
+					<!-- related links -->
+					<li data-role="list-divider">Related Links</li>
+					<#list related as rel>
+						<li><a href="${rel.@href?replace(".xml",".html")?html}"><p>${rel.@title}</p></a></li>
+					</#list>
+					</#if>
+					
+					</ul>	
+				</div>
+			</div>		
 			
-			<#if feed.entry[0].author?size &gt; 0> 
-			<!-- authors -->
-			<li data-role="list-divider">Author(s) of this book</li>
-			<#list feed.entry[0].author as author>
-				<li><a href="./${author.uri?replace(".xml",".html")?html}"><p>${author.name}</p></a></li>
-			</#list>
-			</#if>
-			
-			<#if related?size &gt; 0>
-			<!-- related links -->
-			<li data-role="list-divider">Related Links</li>
-			<#list related as rel>
-				<li><a href="${rel.@href?replace(".xml",".html")?html}"><p>${rel.@title}</p></a></li>
-			</#list>
-			</#if>
-			
-			</ul>
-			
-			
-			
+			<div data-role="footer"> 
+			</div>
 		</div>
 	</body>
 </html>
