@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.dao.IDataAccessObject;
+import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
@@ -38,7 +39,7 @@ public class CategoryIndexController extends JanusController {
 		IDataAccessObject<?> dao = null;
 		if(request.getServletPath().toLowerCase().contains("author")) {
 			category="author";
-			dao = DAOFactory.INSTANCE.getDAO(Book.class);
+			dao = DAOFactory.INSTANCE.getDAO(Author.class);
 		} else if(request.getServletPath().toLowerCase().contains("book")) {
 			category="book";
 			dao = DAOFactory.INSTANCE.getDAO(Book.class);

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
+import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
@@ -28,7 +29,7 @@ public class IndexController extends JanusController {
 		//template object map
 		Map<String, Object> elements = new HashMap<String, Object>();
 		
-		elements.put("authors", DAOFactory.INSTANCE.getDAO(Book.class).get());
+		elements.put("authors", DAOFactory.INSTANCE.getDAO(Author.class).get());
 		elements.put("books", DAOFactory.INSTANCE.getDAO(Book.class).get());
 		elements.put("series", DAOFactory.INSTANCE.getDAO(Series.class).get());
 		elements.put("tags", DAOFactory.INSTANCE.getDAO(Tag.class).get());
