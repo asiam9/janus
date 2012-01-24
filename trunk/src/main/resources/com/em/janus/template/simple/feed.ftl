@@ -22,7 +22,7 @@
 		<#assign link=entry["link[contains(@type,'type=feed')]"]/>
 		<#assign book=entry["link[contains(@type,'type=entry')]"]/>
 		<#assign thumb=entry["link[contains(@rel,'thumbnail')]"]/>
-		<table id=${entry.id?html}>
+		<table 'id=${entry.id?html}'>
 			<tr>
 				<#if thumb?size &gt; 0 && thumb[0].@href?length &gt; 1>
 				<td rowspan="2">
@@ -36,6 +36,7 @@
 				<#else>
 				</#if>
 			</tr>
+			<tr>
 				<td>${(entry.content[0]!"")?html}</td>
 			</tr>
 		</table>
