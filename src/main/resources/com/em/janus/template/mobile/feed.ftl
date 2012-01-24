@@ -5,19 +5,22 @@
 		
 		<!-- mobile viewport -->
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"> 
+
+		<!-- jquery style -->
+		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.0.min.css" />
 		
-		<!-- jquery -->
-		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.0rc2.min.css" />
-		<script src="./jquery/jquery-1.7.min.js"></script>
-		<script src="./jquery/mobile/jquery.mobile-1.0rc2.min.js"></script>
+		<!-- jquery -->		
+		<script type="text/javascript" src="./jquery/jquery-1.6.4.min.js"></script>
+		<script type="text/javascript" src="./jquery/mobile/jquery.mobile-1.0.min.js"></script>
+
+		<!-- cookie management -->
+		<script type="text/javascript" src="./js/cookies.js"></script>					
 		
 		<!-- janus style -->
-		<link rel="stylesheet" href="./style/mobile/general.css" />
-		<link rel="stylesheet" href="./style/mobile/feed.css" />
+		<link rel="stylesheet" href="./style/mobile/mobile.css" />
 	</head>
 	<body>
 		<div data-role="page" id="content-page" data-add-back-btn="true" data-theme="b">
-		
 			<!-- jquery mobile header bar -->
 			<div data-role="header"> 
 				<h1>${feed.title[0]?html}</h1> 
@@ -26,7 +29,7 @@
 			
 			<!-- content -->
 			<div data-role="content" data-add-back-btn="true">
-				<div class="content-primary">	
+				<div class="content-only">	
 					<ul data-role="listview">	
 						<#list feed.entry as entry>
 							<#assign link=entry["link[contains(@type,'type=feed')]"]/>

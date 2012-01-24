@@ -86,6 +86,8 @@ public abstract class JanusController extends HttpServlet {
 				mode = "fbreader";
 			} else if(userAgent.contains("opds")) {
 				mode = "opds";
+			} else if(userAgent.contains("kindle") || userAgent.contains("nook")) {
+				mode = "epaper";
 			} else if((userAgent.contains("safari") && userAgent.contains("ip") && userAgent.contains("mobile")) || userAgent.contains("android")) {
 				mode = "mobile";
 			} else {
@@ -201,15 +203,21 @@ public abstract class JanusController extends HttpServlet {
 				//output writer
 				Writer htmlOut = new StringWriter();
 				//hit template
+				//todo: clean this up a bit... it should use a more sophisticated system (prefix perhaps) to get the template.  it should
+				//not rely on this very strange multi-tier structure.
 				if("book".equals(type)){
 					if("mobile".equals(mode)) {
 						TemplateController.INSTANCE.process(htmlOut, root, "mobile/entry.ftl");
+					} else if("epaper".equals(mode)) {
+						TemplateController.INSTANCE.process(htmlOut, root, "simple/entry.ftl");
 					} else {
 						TemplateController.INSTANCE.process(htmlOut, root, "simple/entry.ftl");
 					}
 				} else {
 					if("mobile".equals(mode)) {
 						TemplateController.INSTANCE.process(htmlOut, root, "mobile/feed.ftl");
+					} else if("epaper".equals(mode)) {
+						TemplateController.INSTANCE.process(htmlOut, root, "simple/feed.ftl");
 					} else {
 						TemplateController.INSTANCE.process(htmlOut, root, "simple/feed.ftl");
 					}
@@ -229,13 +237,11 @@ public abstract class JanusController extends HttpServlet {
 		
 		//responses to make no-cache happen, causes problems with jQuery
 		// Set to expire far in the past.
-		response.setHeader("Expires", "Mon, 28 March 1983 12:00:00 GMT");
-		// Set standard HTTP/1.1 no-cache headers.
-		response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
-		// Set IE extended HTTP/1.1 no-cache headers (use addHeader).
-		response.addHeader("Cache-Control", "post-check=0, pre-check=0");
+		response.addHeader("Expires", "0");
+		// Set standard HTTP/1.1 no-cache headers. (And extended no-cache headers.)
+		response.addHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
 		// Set standard HTTP/1.0 no-cache header.
-		response.setHeader("Pragma", "no-cache");		
+		response.addHeader("Pragma", "no-cache");		
 		
 		//set output size in bytes
 		response.setContentLength(output.getBytes().length);

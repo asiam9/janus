@@ -3,6 +3,7 @@
 	
 	<title>${book.title?xml}</title>
 	<id>janus:book:${book.id?c}</id>
+	<raw>${book.id?c}</raw>
 
  	<link href="./index.xml" type="application/atom+xml;type=feed;profile=opds-catalog" rel="breadcrumb" title="Janus Catalog" />
 	<link href="./index.xml" type="application/atom+xml;type=feed;profile=opds-catalog" rel="start" title="Janus catalog" />
