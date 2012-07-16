@@ -31,8 +31,11 @@ public class EhCacheManager {
 	}
 	
 	public static void close() {
-		EhCacheManager.manager.clearAll();
-		EhCacheManager.manager.shutdown();
+		//only clear and close if there are active caches
+		if(EhCacheManager.manager != null && EhCacheManager.manager.getCacheNames().length > 0) {
+			EhCacheManager.manager.clearAll();
+			EhCacheManager.manager.shutdown();
+		}
 	}
 	
 }

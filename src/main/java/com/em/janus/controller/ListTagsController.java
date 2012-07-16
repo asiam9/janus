@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.config.JanusConfiguration;
+import com.em.janus.config.ServletConfigUtility;
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
@@ -34,6 +35,9 @@ public class ListTagsController extends JanusController {
 
 	@Override
 	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+		//get configuration
+		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
+		
 		//sort mode
 		String sort = request.getParameter("sort");
 		//sort is a potential SQL injection problem.  it must equal "name" or "books" or "series"
@@ -54,13 +58,13 @@ public class ListTagsController extends JanusController {
 			String sizeString = request.getParameter("size");
 			String indexString = request.getParameter("index");
 				
-			int size = JanusConfiguration.INSTANCE.getPageSize();
+			int size = config.getPageSize();
 			int index = 0;
 			
 			try {
 				size = Integer.parseInt(sizeString);
 			} catch (Exception e) {
-				size = JanusConfiguration.INSTANCE.getPageSize();
+				size = config.getPageSize();
 			}
 			
 			try {

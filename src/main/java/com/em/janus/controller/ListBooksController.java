@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.config.JanusConfiguration;
+import com.em.janus.config.ServletConfigUtility;
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
@@ -37,6 +38,9 @@ public class ListBooksController extends JanusController {
   
 	@Override
 	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+		//get configuration
+		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
+		
 		//sort mode
 		String sort = request.getParameter("sort");
 		if(sort == null || sort.isEmpty()) sort = "title";
@@ -58,13 +62,13 @@ public class ListBooksController extends JanusController {
 		String startsWith = request.getParameter("starts");
 		if(startsWith != null && startsWith.isEmpty()) startsWith = null;
 		
-		int size = JanusConfiguration.INSTANCE.getPageSize();
+		int size = config.getPageSize();
 		int index = 0;
 		
 		try {
 			size = Integer.parseInt(sizeString);
 		} catch (Exception e) {
-			size = JanusConfiguration.INSTANCE.getPageSize();
+			size = config.getPageSize();
 		}
 		
 		try {

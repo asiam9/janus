@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
-import com.em.janus.dao.calibre.SeriesDAO;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
@@ -71,7 +70,7 @@ public class AuthorController extends JanusController {
 		Set<Book> books = DAOFactory.INSTANCE.getDAO(Book.class).getByAuthorId(id);
 		Set<Book> noSeriesBooks = new TreeSet<Book>();
 		for(Book book : books) {
-			book.setSeries(SeriesDAO.INSTANCE.getByBookId(book.getId()));
+			book.setSeries(DAOFactory.INSTANCE.getDAO(Series.class).getByBookId(book.getId()));
 			if(book.getSeries().size() == 0) {
 				noSeriesBooks.add(book);
 			}

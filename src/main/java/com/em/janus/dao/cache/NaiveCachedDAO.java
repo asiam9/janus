@@ -18,7 +18,7 @@ import com.em.janus.model.Entity;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
 
-public class NaiveCachedDAO<T extends Entity> implements IDataAccessObject<T>, ICachedDAO{
+public class NaiveCachedDAO<T extends Entity> implements IDataAccessObject<T>, ICachedDAO {
 
 	private IDataAccessObject<T> dao = null;
 	
@@ -41,7 +41,7 @@ public class NaiveCachedDAO<T extends Entity> implements IDataAccessObject<T>, I
 		//decorate the static dao
 		this.dao = daoToCache;
 		
-		//descisions based on output class
+		//decisions based on output class
 		this.primaryType = primaryType;
 		
 		//register to be managed for eviction notices

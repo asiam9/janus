@@ -18,7 +18,10 @@ import org.codemonkey.simplejavamail.TransportStrategy;
 import org.slf4j.Logger;
 
 import com.em.janus.config.JanusConfiguration;
+import com.em.janus.config.ServletConfigUtility;
+import com.em.janus.dao.DAOFactory;
 import com.em.janus.dao.filesystem.BookFilesAO;
+import com.em.janus.model.Book;
 import com.em.janus.model.FileInfo;
 
 @WebServlet("/email")
@@ -57,7 +60,7 @@ public class EmailServlet extends HttpServlet{
 		//get the servlet context
 		ServletContext context = request.getServletContext();
 		
-		JanusConfiguration config = JanusConfiguration.INSTANCE;
+		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
 		//get email properties from config
 		String from = config.getEmailFrom();
@@ -96,7 +99,7 @@ public class EmailServlet extends HttpServlet{
 		String ext = "mobi";
 		
 		//get the file from the file access object
-		FileInfo fileInfo = BookFilesAO.INSTANCE.getBookFile(context, id, ext);
+		FileInfo fileInfo = BookFilesAO.INSTANCE.getBookFile(context, DAOFactory.INSTANCE.getDAO(Book.class), id, ext);
 		
 		//if something is wrong with the file, then bail with a 404
 		if(fileInfo.getFile() == null || fileInfo.getFile().isDirectory() || fileInfo.getFile().length() == 0) {

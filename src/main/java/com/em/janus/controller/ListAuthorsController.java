@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.config.JanusConfiguration;
+import com.em.janus.config.ServletConfigUtility;
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
@@ -36,6 +37,9 @@ public class ListAuthorsController extends JanusController {
 
 	@Override
 	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+		//get configuration
+		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
+		
 		//get potential series id
 		String seriesIdString = request.getParameter("series");
 		int seriesId = 0;
@@ -77,13 +81,13 @@ public class ListAuthorsController extends JanusController {
 			String sizeString = request.getParameter("size");
 			String indexString = request.getParameter("index");
 				
-			int size = JanusConfiguration.INSTANCE.getPageSize();
+			int size = config.getPageSize();
 			int index = 0;
 			
 			try {
 				size = Integer.parseInt(sizeString);
 			} catch (Exception e) {
-				size = JanusConfiguration.INSTANCE.getPageSize();
+				size = config.getPageSize();
 			}
 			
 			try {

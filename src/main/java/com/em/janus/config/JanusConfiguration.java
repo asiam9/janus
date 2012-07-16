@@ -9,15 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import org.slf4j.Logger;
 
-public enum JanusConfiguration {
-
-	INSTANCE;
+public class JanusConfiguration {
 	
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
@@ -29,7 +23,7 @@ public enum JanusConfiguration {
 	private List<String> ebookExtensions = new ArrayList<String>();
 	
 	//cache mechanism
-	private boolean useEhCache = true;
+	private String cacheProvider = "INFINISPAN";
 
 	//page size
 	private int pageSize = 50;
@@ -42,22 +36,19 @@ public enum JanusConfiguration {
 	private String emailUser = "";
 	private String emailPassword = "";
 	
-	private JanusConfiguration() {
-		//load environment config by jndi
-		Context initCtx;
-		//use context to look up config file path through jndi
-		try {
-			initCtx = new InitialContext();
-			Context envCtx = (Context) initCtx.lookup("java:comp/env");
-			
-			this.configFilePath = (String)envCtx.lookup("configFile");
-		} catch (NamingException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public JanusConfiguration() {
+		this.doConfigurationInit("/var/janus.conf");
+	}
+	
+	public JanusConfiguration(String tryConfigFilePath) {
+		this.doConfigurationInit(tryConfigFilePath);
+	}
+	
+	public void doConfigurationInit(String tryConfigFilePath) {
+		//use injected configuration path
+		this.configFilePath = tryConfigFilePath;
 		
-		//need a config file
+		//need a config file if none is found
 		if(this.configFilePath == null || this.configFilePath.isEmpty()) {
 			this.configFilePath = "/var/janus.conf";
 		}
@@ -89,12 +80,15 @@ public enum JanusConfiguration {
 		} catch (NumberFormatException nfe) {
 			this.port = 25;
 		}
-		this.emailUser = props.getProperty("email.user",this.emailUser);
-		this.emailPassword = props.getProperty("email.password",this.emailPassword);
-		this.from = props.getProperty("email.from",this.from);
-		this.security = props.getProperty("email.security",this.security);
+		this.emailUser = props.getProperty("email.user", this.emailUser);
+		this.emailPassword = props.getProperty("email.password", this.emailPassword);
+		this.from = props.getProperty("email.from", this.from);
+		this.security = props.getProperty("email.security", this.security);
 		
-		//build extensions by hand
+		//cache provider
+		this.cacheProvider = props.getProperty("cache.provider", this.cacheProvider);
+		
+		//build allowed extensions by hand
 		this.ebookExtensions.add("epub");
 		this.ebookExtensions.add("pdf");
 		this.ebookExtensions.add("lit");
@@ -126,8 +120,8 @@ public enum JanusConfiguration {
 		return ebookExtensions;
 	}
 	
-	public boolean useEhCache() {
-		return this.useEhCache;
+	public String getCacheProvider() {
+		return this.cacheProvider;
 	}
 
 	public String getSmtp() {

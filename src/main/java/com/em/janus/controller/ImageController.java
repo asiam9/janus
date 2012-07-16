@@ -16,12 +16,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 
+import com.em.janus.config.JanusConfiguration;
+import com.em.janus.config.ServletConfigUtility;
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.dao.filesystem.CoverFileAO;
 import com.em.janus.model.Book;
-import com.thebuzzmedia.imgscalr.Scalr;
 
 /**
  * Servlet implementation class CoverController
@@ -56,6 +58,9 @@ public class ImageController extends HttpServlet {
 	protected void serveImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//get the servlet context
 		ServletContext context = request.getServletContext();
+		
+		//get configuration from context
+		final JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(context);
 		
 		//type
 		String type = request.getParameter("type");
@@ -103,7 +108,7 @@ public class ImageController extends HttpServlet {
 		if(books.size() > 0) {
 			Book book = books.iterator().next();
 			
-			coverFile = CoverFileAO.INSTANCE.getCoverImage(book);
+			coverFile = CoverFileAO.INSTANCE.getCoverImage(config, book);
 		}
 
 		//if the cover file is available

@@ -3,6 +3,7 @@ package com.em.janus.dao.filesystem;
 import java.io.File;
 import java.io.FileFilter;
 
+import com.em.janus.config.JanusConfiguration;
 import com.em.janus.model.Book;
 
 public enum CoverFileAO {
@@ -13,11 +14,11 @@ public enum CoverFileAO {
 		
 	}
 	
-	public File getCoverImage(Book book) {
+	public File getCoverImage(JanusConfiguration config, Book book) {
 		
 		File file = null;
 	
-		File bookDir = FileAO.getBookDirectory(book);
+		File bookDir = FileAO.getBookDirectory(config, book);
 		
 		//find cover file
 		String coverPath = bookDir.getAbsolutePath() + File.separatorChar + "cover.jpg";

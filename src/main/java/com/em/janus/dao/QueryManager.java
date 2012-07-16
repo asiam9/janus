@@ -22,7 +22,7 @@ public enum QueryManager {
 	
 	private Semaphore queryLock = new Semaphore(1,true);
 	
-	public <T extends Entity> Set<T> query(IDataAccessObject<T> dao, String queryString, Object ... params) {
+	public <T extends Entity> Set<T> query(String dbPath, IDataAccessObject<T> dao, String queryString, Object ... params) {
 		
 		try {
 			this.queryLock.acquire();
@@ -37,7 +37,7 @@ public enum QueryManager {
 		if(dao == null || queryString == null) return results;
 		
 		//get connection
-		Connection connection = ConnectionManager.INSTANCE.getConnection();
+		Connection connection = ConnectionManager.INSTANCE.getConnection(dbPath);
 	
 		try {
 			

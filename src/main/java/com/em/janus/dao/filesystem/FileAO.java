@@ -7,9 +7,10 @@ import com.em.janus.model.Book;
 
 public class FileAO {
 
-	public static File getBookDirectory(Book book) {
+	public static File getBookDirectory(JanusConfiguration config, Book book) {
 		
-		String path = JanusConfiguration.INSTANCE.getBasePath() + File.separatorChar + book.getPathToFile();
+		String path = config.getBasePath() + File.separatorChar + book.getPathToFile();
+		
 		File originalFile = new File(path);
 		File parentFile = null;
 		File bookDir = null;

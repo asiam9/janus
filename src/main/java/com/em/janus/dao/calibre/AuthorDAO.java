@@ -4,14 +4,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-import com.em.janus.dao.IDataAccessObject;
 import com.em.janus.dao.QueryManager;
 import com.em.janus.model.Author;
 
-public enum AuthorDAO implements IDataAccessObject<Author>{
-	
-	INSTANCE;
-	
+public class AuthorDAO extends BaseCalibreDAO<Author>{
+		
+	public AuthorDAO(String dbPath) {
+		super(dbPath);
+	}
+
 	@Override
 	public Set<Author> get() {
 		return this.simpleSearch("");
@@ -61,7 +62,7 @@ public enum AuthorDAO implements IDataAccessObject<Author>{
 	}
 	
 	private Set<Author> query(String queryString, Object ... parameters) {
-		return QueryManager.INSTANCE.query(this, queryString, parameters);
+		return QueryManager.INSTANCE.query(this.getDbPath(), this, queryString, parameters);
 	}
 	
 	@Override

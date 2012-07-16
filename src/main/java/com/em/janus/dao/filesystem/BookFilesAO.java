@@ -9,7 +9,8 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import com.em.janus.config.JanusConfiguration;
-import com.em.janus.dao.calibre.BookDAO;
+import com.em.janus.config.ServletConfigUtility;
+import com.em.janus.dao.IDataAccessObject;
 import com.em.janus.model.Book;
 import com.em.janus.model.FileInfo;
 
@@ -24,8 +25,11 @@ public enum BookFilesAO {
 	public List<FileInfo> getEbookFiles(ServletContext context, Book book) {
 		List<FileInfo> results = new ArrayList<FileInfo>();
 
+		//get configuration
+		final JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(context);
+		
 		//get path
-		File bookDir = FileAO.getBookDirectory(book);
+		File bookDir = FileAO.getBookDirectory(config, book);
 		
 		if(bookDir.exists() && bookDir.isDirectory()) {
 		
@@ -33,7 +37,7 @@ public enum BookFilesAO {
 				@Override
 				public boolean accept(File dir, String name) {
 					//get acceptable extensions from configuration object
-					List<String> extensions = JanusConfiguration.INSTANCE.getAllowedExtensions();
+					List<String> extensions = config.getAllowedExtensions();
 					
 					String ext = name.substring(name.lastIndexOf(".")+1);
 					
@@ -69,16 +73,18 @@ public enum BookFilesAO {
 		return results;
 	}
 	
-	public FileInfo getBookFile(ServletContext context, int bookId, final String extension) {
+	public FileInfo getBookFile(ServletContext context, IDataAccessObject<Book> bookDAO, int bookId, final String extension) {
 		
 		FileInfo info = new FileInfo();
 		info.setExtension(extension);
 		
+		final JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(context);
+		
 		//bail if the extension isn't in the extension list
-		if(!JanusConfiguration.INSTANCE.getAllowedExtensions().contains(extension)) return info;
+		if(!config.getAllowedExtensions().contains(extension)) return info;
 		
 		//get book
-		Set<Book> books = BookDAO.INSTANCE.getByBookId(bookId);
+		Set<Book> books = bookDAO.getByBookId(bookId);
 		Book book = null;
 		if(books != null && books.size() > 0) {
 			book = books.iterator().next();
@@ -86,7 +92,7 @@ public enum BookFilesAO {
 		
 		if(book != null) {
 			//get path file, and if path exists... do the rest of our logic
-			File coverPath = FileAO.getBookDirectory(book);
+			File coverPath = FileAO.getBookDirectory(config, book);
 			
 			if(coverPath.exists() && coverPath.isDirectory()) {
 				File[] ebooks = coverPath.listFiles(new FilenameFilter() {

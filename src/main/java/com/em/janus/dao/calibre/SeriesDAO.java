@@ -4,13 +4,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-import com.em.janus.dao.IDataAccessObject;
 import com.em.janus.dao.QueryManager;
 import com.em.janus.model.Series;
 
-public enum SeriesDAO implements IDataAccessObject<Series>{
+public class SeriesDAO extends BaseCalibreDAO<Series> {
 
-	INSTANCE;
+	public SeriesDAO(String dbPath) {
+		super(dbPath);
+	}
 
 	public Set<Series> get() {
 		return this.simpleSearch("");
@@ -56,7 +57,7 @@ public enum SeriesDAO implements IDataAccessObject<Series>{
 	}
 	
 	private Set<Series> query(String queryString, Object ... parameters) {
-		return QueryManager.INSTANCE.query(this, queryString, parameters);
+		return QueryManager.INSTANCE.query(this.getDbPath(), this, queryString, parameters);
 	}
 	
 	public Series build(ResultSet fromResults) throws SQLException {
