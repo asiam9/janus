@@ -7,14 +7,10 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.sqlite.SQLiteConfig;
 
-import com.em.janus.config.JanusConfiguration;
-
 public enum ConnectionManager {
 	
 	INSTANCE;
 
-	private String dbPath = JanusConfiguration.INSTANCE.getDatabasePath();
-	
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
 	private ConnectionManager() {
@@ -29,10 +25,10 @@ public enum ConnectionManager {
 		}
 	}
 	
-	public Connection getConnection() {
+	public Connection getConnection(String dbPath) {
 		Connection connection = null;
 
-		String connectionURI = "jdbc:sqlite:" + this.dbPath;
+		String connectionURI = "jdbc:sqlite:" + dbPath;
 
 		//create config
 		SQLiteConfig config = new SQLiteConfig();

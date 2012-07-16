@@ -13,7 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.em.janus.dao.DAOFactory;
 import com.em.janus.dao.filesystem.BookFilesAO;
+import com.em.janus.model.Book;
 import com.em.janus.model.FileInfo;
 
 /**
@@ -65,7 +67,7 @@ public class FileController extends HttpServlet {
 		}
 		
 		//get the file from the file access object
-		FileInfo fileInfo = BookFilesAO.INSTANCE.getBookFile(context, id, ext);
+		FileInfo fileInfo = BookFilesAO.INSTANCE.getBookFile(context, DAOFactory.INSTANCE.getDAO(Book.class), id, ext);
 		
 		//if something is wrong with the file, then bail with a 404
 		if(fileInfo.getFile() == null || fileInfo.getFile().isDirectory() || fileInfo.getFile().length() == 0) {

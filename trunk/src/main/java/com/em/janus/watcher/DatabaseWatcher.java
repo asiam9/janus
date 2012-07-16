@@ -4,26 +4,25 @@ import java.io.File;
 
 import org.slf4j.Logger;
 
-import com.em.janus.config.JanusConfiguration;
 import com.em.janus.dao.CacheManager;
 
-public enum DatabaseWatcher implements Runnable {
-
-	INSTANCE;
+public class DatabaseWatcher implements Runnable {
 
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
 	private boolean keepRunning = true;
 	
-	private DatabaseWatcher() {
-		
+	private String path = null;
+	
+	public DatabaseWatcher(String path) {
+		this.path = path;
 	}
 	
 	@Override
 	public void run() {
 
 		//get path to database file
-		String path = JanusConfiguration.INSTANCE.getDatabasePath();
+		String path = this.path;
 		
 		//get file object for database
 		File database = new File(path);

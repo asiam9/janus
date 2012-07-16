@@ -4,14 +4,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
-import com.em.janus.dao.IDataAccessObject;
 import com.em.janus.dao.QueryManager;
 import com.em.janus.model.Tag;
 
-public enum TagDAO implements IDataAccessObject<Tag> {
+public class TagDAO extends BaseCalibreDAO<Tag> {
+		
+	public TagDAO(String dbPath) {
+		super(dbPath);
+	}
 
-	INSTANCE;
-	
 	public Set<Tag> get() {
 		return this.simpleSearch("");
 	}
@@ -56,7 +57,7 @@ public enum TagDAO implements IDataAccessObject<Tag> {
 	}
 	
 	private Set<Tag> query(String queryString, Object ... parameters) {
-		return QueryManager.INSTANCE.query(this, queryString, parameters);
+		return QueryManager.INSTANCE.query(this.getDbPath(), this, queryString, parameters);
 	}
 	
 	public Tag build(ResultSet fromResults) throws SQLException {

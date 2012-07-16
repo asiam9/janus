@@ -6,14 +6,15 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Set;
 
-import com.em.janus.dao.IDataAccessObject;
 import com.em.janus.dao.QueryManager;
 import com.em.janus.model.Book;
 
-public enum BookDAO implements IDataAccessObject<Book>{
-
-	INSTANCE;
+public class BookDAO extends BaseCalibreDAO<Book> {
 	
+	public BookDAO(String dbPath) {
+		super(dbPath);
+	}
+
 	private String selectFields = "b.id, b.title, b.sort, b.timestamp, b.pubdate, b.series_index, b.author_sort, b.isbn, b.lccn, b.path, b.uuid, b.has_cover, b.last_modified";
 	private String selectFieldsBasic = this.selectFields.replaceAll("b\\.", "");
 	
@@ -61,7 +62,7 @@ public enum BookDAO implements IDataAccessObject<Book>{
 	}
 	
 	private Set<Book> query(String queryString, Object ... parameters) {
-		return QueryManager.INSTANCE.query(this, queryString, parameters);
+		return QueryManager.INSTANCE.query(this.getDbPath(), this, queryString, parameters);
 	}
 	
 	public Book build(ResultSet fromResults) throws SQLException {

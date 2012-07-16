@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.em.janus.config.JanusConfiguration;
+import com.em.janus.dao.cache.InfinispanCachedDAO;
 import com.em.janus.dao.cache.NaiveCachedDAO;
 import com.em.janus.dao.cache.EhCachedDAO;
 import com.em.janus.dao.calibre.AuthorDAO;
@@ -20,6 +21,8 @@ public enum DAOFactory {
 
 	INSTANCE;
 	
+	private JanusConfiguration config = null;
+	
 	private IDataAccessObject<Book> book = null;
 	private IDataAccessObject<Tag> tag = null;
 	private IDataAccessObject<Series> series = null;
@@ -28,17 +31,45 @@ public enum DAOFactory {
 	private Map<Class<?>,IDataAccessObject<?>> factoryMap = new HashMap<Class<?>, IDataAccessObject<?>>();
 	
 	private DAOFactory() {
-		if(JanusConfiguration.INSTANCE.useEhCache()) {
-			this.book = new EhCachedDAO<Book>(Book.class, BookDAO.INSTANCE);
-			this.tag = new EhCachedDAO<Tag>(Tag.class, TagDAO.INSTANCE);
-			this.series = new EhCachedDAO<Series>(Series.class, SeriesDAO.INSTANCE);
-			this.author = new EhCachedDAO<Author>(Author.class, AuthorDAO.INSTANCE);
+
+	}
+	
+	public void setConfig(JanusConfiguration config) {
+		this.config = config;
+		
+		//clear
+		this.factoryMap.clear();
+		
+		BookDAO bookDAO = new BookDAO(config.getDatabasePath());
+		TagDAO tagDAO = new TagDAO(config.getDatabasePath());
+		SeriesDAO seriesDAO = new SeriesDAO(config.getDatabasePath());
+		AuthorDAO authorDAO = new AuthorDAO(config.getDatabasePath());
+		
+		//get provider
+		String provider = this.config.getCacheProvider();
+		
+		//build dao based on provider
+		if("eh".equalsIgnoreCase(provider) || "ehcache".equalsIgnoreCase(provider)) {
+			this.book = new EhCachedDAO<Book>(Book.class, bookDAO);
+			this.tag = new EhCachedDAO<Tag>(Tag.class, tagDAO);
+			this.series = new EhCachedDAO<Series>(Series.class, seriesDAO);
+			this.author = new EhCachedDAO<Author>(Author.class, authorDAO);
+		} else if ("infinispan".equalsIgnoreCase(provider)){
+			this.book = new InfinispanCachedDAO<Book>(Book.class, bookDAO);
+			this.tag = new InfinispanCachedDAO<Tag>(Tag.class, tagDAO);
+			this.series = new InfinispanCachedDAO<Series>(Series.class, seriesDAO);
+			this.author = new InfinispanCachedDAO<Author>(Author.class, authorDAO);
+		} else if(!"none".equalsIgnoreCase(provider)){
+			this.book = new NaiveCachedDAO<Book>(Book.class, bookDAO);
+			this.tag = new NaiveCachedDAO<Tag>(Tag.class, tagDAO);
+			this.series = new NaiveCachedDAO<Series>(Series.class, seriesDAO);
+			this.author = new NaiveCachedDAO<Author>(Author.class, authorDAO);
 		} else {
-			this.book = new NaiveCachedDAO<Book>(Book.class, BookDAO.INSTANCE);
-			this.tag = new NaiveCachedDAO<Tag>(Tag.class, TagDAO.INSTANCE);
-			this.series = new NaiveCachedDAO<Series>(Series.class, SeriesDAO.INSTANCE);
-			this.author = new NaiveCachedDAO<Author>(Author.class, AuthorDAO.INSTANCE);
-		}	
+			this.book = bookDAO;
+			this.tag = tagDAO;
+			this.series = seriesDAO;
+			this.author = authorDAO;
+		}
 		
 		//add constructed caches to the factory
 		this.factoryMap.put(Author.class, this.author);

@@ -147,6 +147,14 @@ public abstract class JanusController extends HttpServlet {
 		try {
 			this.janusAction(request, response, out, mode);
 		} catch (Exception ex) {
+			//end benchmark
+			long end = (new Date()).getTime();
+			
+			this.logger.error("Servlet failed: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent=\"{}\")",new Object[]{Long.toString((end-start)),path,request.getQueryString(),mode,outputType.toString(),type,userAgent});
+			
+			//print stack trace
+			ex.printStackTrace();			
+			
 			//an exception was caught, go straight to 500 error
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
