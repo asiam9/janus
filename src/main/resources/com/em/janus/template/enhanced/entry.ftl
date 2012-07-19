@@ -55,14 +55,6 @@
 	    <!-- content -->
 	    <div class="container">
 			
-			<div class='row'>
-				<div class="span3">
-					<ul class="pager">
-						<li class="previous"><a href=".${previousPath!"#"}${previousQuery!""}">Back</a></li>
-					</ul>				
-				</div>
-			</div>
-			
 			<!-- top row, basic information, details, and right-pushed thumb -->
 			<div class='row'>
 				<!-- information -->
@@ -70,7 +62,13 @@
 					<div class="well">
 						<div class="row-fluid">
 							<div class="span9">
-								<h2>${feed.entry[0].title[0]?html}</h2>
+								<#if feed.entry[0].title[0]?contains(":")>
+								<#assign titleHeader>${feed.entry[0].title[0]?substring(0,feed.entry[0].title[0]?index_of(":"))?html}</#assign>
+								<#assign subtitleHeader>${feed.entry[0].title[0]?substring(feed.entry[0].title[0]?index_of(":")+1)?html}</#assign>
+									<h2>${titleHeader}</h2><h6>${subtitleHeader}</h6>
+								<#else>
+									<h2>${feed.entry[0].title[0]?html}</h2>
+								</#if>
 								<!-- authors -->
 								<div class="row-fluid entryRow">
 									<div class="span9">
@@ -89,16 +87,6 @@
 										<#list files as file><p><a href="${file.@href}"><i class="icon-download"></i>&nbsp;${file.@title}</a></p></#list>
 									</div>		
 								</div>						
-									</#if>
-					
-									<#assign content=feed.entry[0].content[0]!""/>
-									<#if content != "">
-								<!-- comment -->
-								<div class="row-fluid">
-									<div class="span9">
-									<h5>comment:</h5>${content}
-									</div>
-								</div>
 									</#if>
 									
 								<!-- book email feature -->
@@ -119,7 +107,7 @@
 														<#elseif files?size &gt; 1>
 														<#assign ext><select class="span2" id="bookExt" name="ext"><#list files as file><option>${file.@href?substring(files[0].@href?last_index_of(".")+1)?html}</option></#list></select></#assign>
 														</#if>
-														${ext}<input id="emailTo" type="text"/><button class="btn" type="button" id="emailSubmit">&nbsp;<i class="icon-envelope"></i>&nbsp;</button>
+														${ext}<input id="emailTo" type="text" placeholder="sample@kindle.com"/><button class="btn" type="button" id="emailSubmit">&nbsp;<i class="icon-envelope"></i>&nbsp;</button>
 													</div>
 												</div>
 											</div>
@@ -136,8 +124,16 @@
 									<h5>tags:</h5><#list tags as tag><a href="./tag.html?id=${tag.id?html}&mode=enhanced">${tag.name?html}</a><#if tag_has_next>,&nbsp;</#if></#list>
 									</div>
 								</div>
+									</#if>									
+														
+									<#assign content=feed.entry[0].content[0]!""/>
+									<#if content != "">
+								<!-- comment -->
+								<div class="row-fluid entryRow">
+									<div class="span9">${content}</div>
+								</div>
 									</#if>
-								
+																	
 							</div> <!-- end span9 -->
 							<div class="span3 bookEntryImageContainer">
 								<!-- thumbs -->
@@ -164,10 +160,11 @@
 			//when the document is ready
 			$(document).ready(function(){
 				var emailCookie = getCookie(emailCookieKey);
-				if(!emailCookie || emailCookie == "") {
-					emailCookie = "sample@kindle.com";
+				if(!emailCookie || emailCookie == "" ||  emailCookie == emailCookieKey) {
+					emailCookie = "@kindle.com";
+				} else {
+					$('#emailTo').val(emailCookie);
 				}
-				$('#emailTo').val(emailCookie);
 			});
 			
 			//email submit function

@@ -5,12 +5,14 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.slf4j.Logger;
 
 import com.em.janus.dao.CacheManager;
 import com.em.janus.dao.IDataAccessObject;
@@ -23,18 +25,16 @@ import com.em.janus.model.Tag;
 public class InfinispanCachedDAO<T extends Entity> implements ICachedDAO, IDataAccessObject<T> {
 
 	private IDataAccessObject<T> dao = null;
+		
+	private Semaphore cacheUpdateMutex = new Semaphore(1);	
 	
-	/*
-	private Semaphore cacheUpdateMutex = new Semaphore(1);
-	
-	private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
-	*/
+	private Logger log = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
 	private Class<?> primaryType = null;
 	
 	private EmbeddedCacheManager manager = null;
 	
-	private boolean preloaded = false;
+	private volatile boolean preloaded = false;
 	
 	public InfinispanCachedDAO(Class<T> primaryType, IDataAccessObject<T> daoToCache) {
 		//decorate the static dao
@@ -44,7 +44,7 @@ public class InfinispanCachedDAO<T extends Entity> implements ICachedDAO, IDataA
 		this.primaryType = primaryType;
 		
 		//configuration
-		Configuration config = (new ConfigurationBuilder()).eviction().maxEntries(0).build(); 
+		Configuration config = (new ConfigurationBuilder()).eviction().maxEntries(-1).build(); 
 		
 		//build cache
 		this.manager = new DefaultCacheManager();
@@ -67,13 +67,27 @@ public class InfinispanCachedDAO<T extends Entity> implements ICachedDAO, IDataA
 		primaryCache = this.manager.getCache(this.getCacheName(this.primaryType));
 			
 		if(primaryCache.isEmpty()) {
+			try {
+				this.cacheUpdateMutex.acquire();
+			} catch (InterruptedException e) {
+				this.log.error("Could not acquire cache protection mutex: {}", e.getMessage());
+				return Collections.emptySet();
+			}			
+			
 			result = this.dao.get();
+			
+			this.log.info("Primary cache for {} is empty, filling from DAO with {} entries.", this.primaryType.getName(), result.size());
+			
 			for(T r : result) {
 				primaryCache.put(Integer.toString(r.getId()), r);
 			}
 			this.preloaded = true;
+			
+			//release mutex so that cache is now updated
+			this.cacheUpdateMutex.release();
 		} else {
 			result = Collections.unmodifiableSet(new HashSet<T>(primaryCache.values()));
+			this.log.debug("Loaded {} values from {} primary cache.", result.size(), this.primaryType.getName());
 		}
 		
 		return result;
