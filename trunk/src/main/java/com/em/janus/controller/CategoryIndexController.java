@@ -16,6 +16,7 @@ import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.template.TemplateController;
 
 /**
@@ -33,7 +34,7 @@ public class CategoryIndexController extends JanusController {
 	private static final long serialVersionUID = 1L;
        
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//sort mode
 		String category = "book";
 		IDataAccessObject<?> dao = null;
@@ -53,6 +54,9 @@ public class CategoryIndexController extends JanusController {
 			dao = DAOFactory.INSTANCE.getDAO(Tag.class);
 		}
 		
+		//create response
+		JanusResponse janusResponse = new JanusResponse();
+		
 		//template object map
 		Map<String, Object> elements = new HashMap<String, Object>();
 		
@@ -64,6 +68,8 @@ public class CategoryIndexController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/"+category+"_index.ftl");
+		
+		return janusResponse;
 	}
 
 }

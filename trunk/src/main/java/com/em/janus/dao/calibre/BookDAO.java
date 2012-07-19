@@ -15,9 +15,8 @@ public class BookDAO extends BaseCalibreDAO<Book> {
 		super(dbPath);
 	}
 
-	private String selectFields = "b.id, b.title, b.sort, b.timestamp, b.pubdate, b.series_index, b.author_sort, b.isbn, b.lccn, b.path, b.uuid, b.has_cover, b.last_modified";
-	private String selectFieldsBasic = this.selectFields.replaceAll("b\\.", "");
-	
+	private String selectFields = "b.id, b.title, b.sort, b.timestamp, b.pubdate, b.series_index, b.author_sort, b.isbn, b.lccn, b.path, b.uuid, b.has_cover, b.last_modified, c.text";
+
 	public Set<Book> get() {
 		return this.simpleSearch("");
 	}
@@ -27,15 +26,15 @@ public class BookDAO extends BaseCalibreDAO<Book> {
 	}
 	
 	public Set<Book> getByAuthorId(int authorId) {
-		return this.query("select " + this.selectFields + " from books b join books_authors_link a on a.book=b.id where a.author=?",authorId);
+		return this.query("select " + this.selectFields + " from books b join books_authors_link a on a.book=b.id left outer join comments c on c.book=b.id where a.author=?",authorId);
 	}
 	
 	public Set<Book> getBySeriesId(int seriesId) {
-		return this.query("select " + this.selectFields + " from books b join books_series_link s on s.book=b.id where s.series=?",seriesId);
+		return this.query("select " + this.selectFields + " from books b join books_series_link s on s.book=b.id left outer join comments c on c.book=b.id where s.series=?",seriesId);
 	}
 	
 	public Set<Book> getByTagId(int tagId) {
-		return this.query("select " + this.selectFields + " from books b join books_tags_link t on t.book=b.id where t.tag=?",tagId);
+		return this.query("select " + this.selectFields + " from books b join books_tags_link t on t.book=b.id left outer join comments c on c.book=b.id where t.tag=?",tagId);
 	}
 	
 	@Override
@@ -48,7 +47,7 @@ public class BookDAO extends BaseCalibreDAO<Book> {
 	
 	private Set<Book> simpleSearch(String whereClause, Object ... parameters) {
 		//basic clause
-		String queryString = "select " + this.selectFieldsBasic + " from books";
+		String queryString = "select " + this.selectFields + " from books b left outer join comments c on c.book=b.id";
 		
 		//add where clause when and if it should be added
 		if(whereClause != null && !whereClause.isEmpty()) {
@@ -85,6 +84,7 @@ public class BookDAO extends BaseCalibreDAO<Book> {
 		book.setPathToFile(fromResults.getString("path"));
 		book.setUUID(fromResults.getString("uuid"));
 		book.setHasCover(fromResults.getBoolean("has_cover"));
+		book.setCalibreComments(fromResults.getString("text"));
 		
 		//do date parsing
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-DD hh:mm:ss");
@@ -106,7 +106,7 @@ public class BookDAO extends BaseCalibreDAO<Book> {
 		} catch (ParseException e) {
 			
 		}
-		
+	
 		return book;
 	}
 }

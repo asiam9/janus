@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.dao.filesystem.BookFilesAO;
 import com.em.janus.model.Book;
@@ -89,15 +91,13 @@ public class FileController extends HttpServlet {
 		//set the return file name
 		response.setHeader( "Content-Disposition", "attachment; filename=\"" + file.getName() + "\"" );
 		// copy the contents of the file to the output stream
-		byte[] buf = new byte[8192];
-		int count = 0;
-		while ((count = in.read(buf)) >= 0) {
-		    out.write(buf, 0, count);
-		}
-		in.close();
-		
+		IOUtils.copy(in, out);
+				
 		//flush the output stream when done
 		out.flush();
+		
+		//close
+		in.close();
 	}
 
 }

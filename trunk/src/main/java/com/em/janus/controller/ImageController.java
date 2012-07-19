@@ -2,10 +2,9 @@ package com.em.janus.controller;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -56,6 +55,9 @@ public class ImageController extends HttpServlet {
 	}
 	
 	protected void serveImage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		//set up
+		long start = (new Date()).getTime();
+		
 		//get the servlet context
 		ServletContext context = request.getServletContext();
 		
@@ -130,26 +132,27 @@ public class ImageController extends HttpServlet {
 			//get response output stream
 			OutputStream out = response.getOutputStream();
 			
+			BufferedImage image = ImageIO.read(coverFile);
+			
+			//decide on resize
+			int currentWidth = image.getWidth();
+			int currentHeight = image.getHeight();
+			if(resize && (currentWidth > w || currentHeight > h)) {
+				resize = true;
+			} else {
+				resize = false;
+			}
+			
 			//load and resize image
 			if("thumbnail".equals(type) || resize == true) {
-				BufferedImage cover = ImageIO.read(coverFile);
-				BufferedImage thumbnail = Scalr.resize(cover, Scalr.Method.SPEED, w, h);
-				ImageIO.write(thumbnail, "jpg", out);
-				//set image name in output header
-				response.setHeader( "Content-Disposition", "attachment; filename=\"thumbnail.jpg\"" );
-			} else {
-				InputStream in = new FileInputStream(coverFile);
-				response.setContentLength((int)coverFile.length());
-				// copy the contents of the file to the output stream
-				byte[] buf = new byte[8192];
-				int count = 0;
-				while ((count = in.read(buf)) >= 0) {
-				    out.write(buf, 0, count);
-				}
-				in.close();
-				//set image name in output header
-				response.setHeader( "Content-Disposition", "attachment; filename=\"cover.jpg\"" );
+				image = Scalr.resize(image, Scalr.Method.AUTOMATIC, Scalr.Mode.FIT_EXACT, w, h);
 			}
+			
+			//write image to output stream
+			ImageIO.write(image, "jpg", out);
+
+			//set image name in output header
+			response.setHeader( "Content-Disposition", "attachment; filename=\""+ type +".jpg\"" );
 			
 			//close and flush
 			out.flush();
@@ -158,9 +161,14 @@ public class ImageController extends HttpServlet {
 			//feed back error image
 			this.logger.debug("No cover found for book id={}, failover to error image of type={}",id,type);
 			//redirect to cover.jpg
-		    String urlWithSessionID = response.encodeRedirectURL("./images/"+type+".jpg");
+		    String urlWithSessionID = response.encodeRedirectURL("./img/"+type+".jpg");
 		    response.sendRedirect(urlWithSessionID);
 		}
+		
+		//end, and log
+		long end = (new Date()).getTime();
+		this.logger.debug("Image id={}, type={}, served in {}ms", new Object[]{Integer.toString(id), type, Long.toString(end-start)});
+		
 	}
 
 }

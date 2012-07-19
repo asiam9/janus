@@ -42,6 +42,8 @@ public class Book extends Entity implements Comparable<Book>{
 	private Set<Series> series = new HashSet<Series>();
 	
 	private Set<FileInfo> fileInfo = new HashSet<FileInfo>();
+	
+	private String calibreComments = "";
 
 	public String getTitle() {
 		return title;
@@ -161,6 +163,14 @@ public class Book extends Entity implements Comparable<Book>{
 
 	public void setSeriesIndex(double seriesIndex) {
 		this.seriesIndex = seriesIndex;
+	}
+	
+	public String getCalibreComments() {
+		return calibreComments;
+	}
+
+	public void setCalibreComments(String calibreComments) {
+		this.calibreComments = calibreComments;
 	}
 
 	@Override

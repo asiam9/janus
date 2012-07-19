@@ -23,6 +23,7 @@ import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.model.sections.Section;
 import com.em.janus.model.sorting.BookRecentlyAddedComparator;
 import com.em.janus.model.sorting.BookTagsComparator;
@@ -37,7 +38,7 @@ public class ListBooksController extends JanusController {
 	private static final long serialVersionUID = 1L;
   
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//get configuration
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
@@ -103,9 +104,7 @@ public class ListBooksController extends JanusController {
 				Section<Book> target = sections.get(first);
 				if(target == null) {
 					other.getContents().add(book);
-				} else {
-					target.getContents().add(book);
-				}
+				} 
 			}
 			
 			//populate books with "other" before continuing
@@ -128,6 +127,10 @@ public class ListBooksController extends JanusController {
 		}
 		//sort using the comparator selected from input options
 		Collections.sort(sorted,bookComparator);
+
+		//used for paging later
+		int currentIndex= index;
+		int totalItems = sorted.size(); 
 		
 		//get max end size for books list
 		int end = index + size;
@@ -174,6 +177,15 @@ public class ListBooksController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/books.ftl");		
+		
+		//create response
+		JanusResponse janusResponse = new JanusResponse();
+		
+		janusResponse.setItems(totalItems);
+		janusResponse.setPageSize(size);
+		janusResponse.setCurrentIndex(currentIndex);
+		
+		return janusResponse;
 	}
 
 }

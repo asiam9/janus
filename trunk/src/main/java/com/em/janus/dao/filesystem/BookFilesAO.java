@@ -57,6 +57,12 @@ public enum BookFilesAO {
 					String ext = name.substring(name.lastIndexOf(".")+1);
 					if("lit".equals(ext) || name.endsWith("lit")) {
 						mimeType = "application/x-ms-reader, application/x-obak";
+					} else if("mobi".equals(ext) || name.endsWith("mobi")) {
+						mimeType = "application/x-mobipocket-ebook";
+					} else if("epub".equals(ext) || name.endsWith("epub")) {
+						mimeType = "application/epub+zip";
+					} else if("pdf".equals(ext) || name.endsWith("pdf")) {
+						mimeType = "application/pdf";
 					} else {
 						mimeType = "binary/octet-stream";
 					}
@@ -107,8 +113,27 @@ public enum BookFilesAO {
 					//set file
 					info.setFile(ebooks[0]);
 					
+					String mimeType = context.getMimeType(info.getFile().getAbsolutePath());
+					
+					//fix mime type if container can't get it
+					if(mimeType == null || mimeType.isEmpty()) {
+						if("epub".equalsIgnoreCase(extension)) {
+							mimeType = "application/epub+zip";
+						} else if("mobi".equalsIgnoreCase(extension)) {
+							mimeType = "application/x-mobipocket-ebook";
+						} else if("lit".equalsIgnoreCase(extension)) {
+							mimeType = " application/x-ms-reader";
+						} else if("pdf".equalsIgnoreCase(extension)) {
+							mimeType = "application/pdf";
+						} else {
+							//generic binary
+							mimeType = "application/octet-stream";
+						}
+					}
+							
 					//get mime type
-					info.setMimeType(context.getMimeType(info.getFile().getAbsolutePath()));
+					info.setMimeType(mimeType);					
+					
 				}
 				
 			}		

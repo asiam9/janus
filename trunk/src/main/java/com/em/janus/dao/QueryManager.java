@@ -1,11 +1,12 @@
 package com.em.janus.dao;
 
+import java.nio.channels.NonWritableChannelException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
@@ -28,13 +29,14 @@ public enum QueryManager {
 			this.queryLock.acquire();
 		} catch (InterruptedException e) {
 			this.logger.error("An error occured acquiring the query lock.",e);
-			return new HashSet<T>();
+			return Collections.emptySet();
 		}
-		
-		Set<T> results = new TreeSet<T>();
-		
+
 		//if there is a problem (Yo! I'll solve it.) return the empty set
-		if(dao == null || queryString == null) return results;
+		if(dao == null || queryString == null) return Collections.emptySet();
+		
+		//build test result set
+		Set<T> results = new TreeSet<T>();
 		
 		//get connection
 		Connection connection = ConnectionManager.INSTANCE.getConnection(dbPath);
@@ -58,6 +60,13 @@ public enum QueryManager {
 					
 					//query complete
 					break;
+				} catch (NonWritableChannelException nwce) {
+					//can't query
+					this.logger.warn("Could not query database, no retries: {}", nwce.getMessage());
+					//release lock
+					this.queryLock.release();
+					//return empty
+					return Collections.emptySet();
 				} catch (Exception ex) {
 					this.logger.warn("Retrying database query: {}",ex.getMessage());
 				}

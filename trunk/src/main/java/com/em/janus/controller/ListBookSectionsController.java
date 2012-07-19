@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Book;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.model.sections.Section;
 import com.em.janus.model.sorting.BookTitleComparator;
 import com.em.janus.template.TemplateController;
@@ -29,7 +30,7 @@ public class ListBookSectionsController extends JanusController {
 	private static final long serialVersionUID = 1L;
  
 	@Override
-	protected void janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//get all books
 		Set<Book> books = DAOFactory.INSTANCE.getDAO(Book.class).get();
 		
@@ -79,6 +80,10 @@ public class ListBookSectionsController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/book_sections.ftl");		
+		
+		JanusResponse janusResponse = new JanusResponse();
+		
+		return janusResponse;
 	}
 
 }

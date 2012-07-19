@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Series;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.model.sections.Section;
 import com.em.janus.template.TemplateController;
 
@@ -27,7 +28,7 @@ public class ListSeriesSectionsController extends JanusController {
 	private static final long serialVersionUID = 1L;
  
 	@Override
-	protected void janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//sort mode (only name sorting is allowed)
 		
 		String sort = "name";
@@ -78,7 +79,11 @@ public class ListSeriesSectionsController extends JanusController {
 		elements.put("sort",sort);
 		
 		//process template into output stream
-		TemplateController.INSTANCE.process(out, elements, "xml/series_sections.ftl");		
+		TemplateController.INSTANCE.process(out, elements, "xml/series_sections.ftl");	
+		
+		JanusResponse janusResponse = new JanusResponse();
+		
+		return janusResponse;
 	}
 
 }

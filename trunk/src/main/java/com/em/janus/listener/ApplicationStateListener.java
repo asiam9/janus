@@ -99,8 +99,8 @@ public class ApplicationStateListener implements ServletContextListener {
     	//save configuration to context
     	ServletConfigUtility.saveConfigurationInContext(arg0.getServletContext(), config);
     	
-    	//get the watcher thread
-    	this.watcher = new DatabaseWatcher("");
+    	//create the watcher runnable and build a thread from that
+    	this.watcher = new DatabaseWatcher(config.getDatabasePath());
     	this.watcherThread = new Thread(this.watcher);
 
     	

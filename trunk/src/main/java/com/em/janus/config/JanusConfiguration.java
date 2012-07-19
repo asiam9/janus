@@ -23,7 +23,7 @@ public class JanusConfiguration {
 	private List<String> ebookExtensions = new ArrayList<String>();
 	
 	//cache mechanism
-	private String cacheProvider = "INFINISPAN";
+	private String cacheProvider = "EH";
 
 	//page size
 	private int pageSize = 50;
@@ -102,6 +102,7 @@ public class JanusConfiguration {
 		this.logger.info("Email USER: {}",this.emailUser);
 		this.logger.info("Email FROM: {}",this.from);
 		this.logger.info("Email SECURITY: {}",this.security);
+		this.logger.info("Cache Provider: {}",this.cacheProvider);
 	}
 	
 	public String getBasePath() {

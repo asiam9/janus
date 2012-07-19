@@ -7,12 +7,12 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, maximum-scale=1"> 
 
 		<!-- jquery style -->
-		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.0.min.css" />
+		<link rel="stylesheet" href="./jquery/mobile/jquery.mobile-1.1.1.min.css" />
+					
+		<!-- jquery -->
+		<script type="text/javascript" src="./jquery/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="./jquery/mobile/jquery.mobile-1.1.1.min.js"></script>
 		
-		<!-- jquery -->		
-		<script type="text/javascript" src="./jquery/jquery-1.6.4.min.js"></script>
-		<script type="text/javascript" src="./jquery/mobile/jquery.mobile-1.0.min.js"></script>
-
 		<!-- cookie management -->
 		<script type="text/javascript" src="./js/cookies.js"></script>					
 		

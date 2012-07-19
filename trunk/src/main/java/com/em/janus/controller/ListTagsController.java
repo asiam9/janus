@@ -21,6 +21,8 @@ import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
+import com.em.janus.model.sections.Section;
 import com.em.janus.model.sorting.TagBookCountComparator;
 import com.em.janus.model.sorting.TagSeriesCountComparator;
 import com.em.janus.template.TemplateController;
@@ -34,9 +36,12 @@ public class ListTagsController extends JanusController {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//get configuration
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
+		
+		//create response for paging / etc
+		JanusResponse janusResponse = new JanusResponse();
 		
 		//sort mode
 		String sort = request.getParameter("sort");
@@ -119,19 +124,41 @@ public class ListTagsController extends JanusController {
 			
 			//add index and size back to template
 			elements.put("index", index);
-			elements.put("size",size);			
+			elements.put("size",size);		
+		} else if("OTHER".equalsIgnoreCase(starts)) {
+			tags = new ArrayList<Tag>(DAOFactory.INSTANCE.getDAO(Tag.class).get());
+			
+			//create other section
+			Section<Tag> other = new Section<Tag>();
+			other.setName("Starting with numbers or special characters");
+			other.setId("OTHER");
+			
+			//sort out again, looking for "others" with same method that the controller used.
+			Map<String,Section<Tag>> sections = Section.generateAlphabeticalSections();
+			
+			for(Tag t : tags) {
+				String value = t.getName();
+				String first = value.substring(0, 1);
+				Section<Tag> section = sections.get(first);
+				if(section == null) {
+					other.getContents().add(t);
+				}
+			}
+			
+			tags = new ArrayList<Tag>(other.getContents());
+			Collections.sort(tags);						
 		} else {
 			//get authors
 			tags = new ArrayList<Tag>(DAOFactory.INSTANCE.getDAO(Tag.class).queryStartsWith(sort, starts));
 			//use only one type of "natural" sort
 			Collections.sort(tags);
-			
-			//grab books and authors for counts
-			for(Tag t : tags) {
-				t.setBooks(DAOFactory.INSTANCE.getDAO(Book.class).getByTagId(t.getId()));
-				t.setAuthors(DAOFactory.INSTANCE.getDAO(Author.class).getByTagId(t.getId()));
-				t.setSeries(DAOFactory.INSTANCE.getDAO(Series.class).getByTagId(t.getId()));
-			}
+		}
+		
+		//grab books and authors for counts
+		for(Tag t : tags) {
+			t.setBooks(DAOFactory.INSTANCE.getDAO(Book.class).getByTagId(t.getId()));
+			t.setAuthors(DAOFactory.INSTANCE.getDAO(Author.class).getByTagId(t.getId()));
+			t.setSeries(DAOFactory.INSTANCE.getDAO(Series.class).getByTagId(t.getId()));
 		}
 		
 		//put elements into template map
@@ -140,7 +167,9 @@ public class ListTagsController extends JanusController {
 		elements.put("sort",sort);
 		
 		//process template into output stream
-		TemplateController.INSTANCE.process(out, elements, "xml/tag_list.ftl");		
+		TemplateController.INSTANCE.process(out, elements, "xml/tag_list.ftl");
+		
+		return janusResponse;
 	}
        
  

@@ -16,6 +16,7 @@ import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.template.TemplateController;
 
 /**
@@ -26,7 +27,7 @@ public class TagController extends JanusController {
 	private static final long serialVersionUID = 1L;
   
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//get id
 		String idString = request.getParameter("id");
 		int id = 0;
@@ -35,7 +36,7 @@ public class TagController extends JanusController {
 		} catch (Exception ex) {
 			id = 0;
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
+			return null;
 		}
 		
 		//get tag
@@ -45,7 +46,7 @@ public class TagController extends JanusController {
 			tag = tags.iterator().next();
 		} else {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
+			return null;
 		}
 		
 		//get books, authors, and series for detail
@@ -65,6 +66,10 @@ public class TagController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/tag.ftl");
+		
+		JanusResponse janusResponse = new JanusResponse();
+		
+		return janusResponse;
 	}
 
 }

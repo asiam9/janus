@@ -15,11 +15,15 @@ public class DatabaseWatcher implements Runnable {
 	private String path = null;
 	
 	public DatabaseWatcher(String path) {
+		this.logger.info("Created metadata database watcher runnable.");
 		this.path = path;
 	}
 	
 	@Override
 	public void run() {
+		
+		//log
+		this.logger.info("Watcher thread started.");
 
 		//get path to database file
 		String path = this.path;
@@ -32,11 +36,17 @@ public class DatabaseWatcher implements Runnable {
 		
 		//initialize if database exists
 		if(database.exists()) {
+			//found database
+			this.logger.info("Found database at path='{}'", this.path);
+			
 			size = database.length();
 			modified = database.lastModified();
 			
 			//init the cache for first run
 			CacheManager.INSTANCE.init();
+		} else {
+			//did not find database
+			this.logger.error("Could not find database at path='{}'", this.path);
 		}
 		
 		//loop until and unless thread is interrupted
