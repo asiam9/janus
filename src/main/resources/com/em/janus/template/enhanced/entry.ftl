@@ -61,7 +61,14 @@
 				<div class="span12">
 					<div class="well">
 						<div class="row-fluid">
+						
+							<#assign cover=feed.entry[0]["link[contains(@rel,'cover')]"]/>
+							
 							<div class="span9">
+								<!-- phone visible thumb -->
+								<img align="right" class="thumbnail visible-phone" src="${cover[0].@href?html}&w=65&h=108"/>
+
+								<!-- title or title with subtitle -->
 								<#if feed.entry[0].title[0]?contains(":")>
 								<#assign titleHeader>${feed.entry[0].title[0]?substring(0,feed.entry[0].title[0]?index_of(":"))?html}</#assign>
 								<#assign subtitleHeader>${feed.entry[0].title[0]?substring(feed.entry[0].title[0]?index_of(":")+1)?html}</#assign>
@@ -69,6 +76,7 @@
 								<#else>
 									<h2>${feed.entry[0].title[0]?html}</h2>
 								</#if>
+
 								<!-- authors -->
 								<div class="row-fluid entryRow">
 									<div class="span9">
@@ -135,10 +143,9 @@
 									</#if>
 																	
 							</div> <!-- end span9 -->
-							<div class="span3 bookEntryImageContainer">
+							<div class="span3 bookEntryImageContainer hidden-phone">
 								<!-- thumbs -->
-								<#assign cover=feed.entry[0]["link[contains(@rel,'cover')]"]/>
-								<img class="pull-right thumbnail" style="margin-top: 10px; margin-bottom: 10px;" src="${cover[0].@href?html}&w=187&h=290"/>
+								<img class="pull-right thumbnail" src="${cover[0].@href?html}&w=187&h=290"/>
 							</div>
 						</div> <!-- end row inside of well -->
 										
