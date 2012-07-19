@@ -106,9 +106,6 @@ public class InfinispanCachedDAO<T extends Entity> implements ICachedDAO, IDataA
 	}
 	
 	private Set<T> get(String key, Class<?> getClass) {
-		//bail if the get class is  null
-		if(getClass == null) return Collections.emptySet();
-		
 		//results
 		Set<T> result = Collections.emptySet();
 		

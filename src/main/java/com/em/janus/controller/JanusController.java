@@ -26,6 +26,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.em.janus.model.output.OutputType;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.template.TemplateController;
 
 import freemarker.ext.dom.NodeModel;
@@ -36,6 +37,10 @@ public abstract class JanusController extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private static final String PREVIOUS_PATH_KEY = "com.em.janus.PreviousPath.key";
+	
+	private static final String PREVIOUS_QUERY_KEY = "com.em.janus.PreviousQuery.key";
 	
 	private Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
@@ -64,6 +69,13 @@ public abstract class JanusController extends HttpServlet {
 		}
 		userAgent = userAgent.toLowerCase();
 		
+		//get previous values
+		String previousPath = (String)request.getSession().getAttribute(JanusController.PREVIOUS_PATH_KEY);
+		String previousQuery = (String)request.getSession().getAttribute(JanusController.PREVIOUS_QUERY_KEY);		
+		
+		//get sort
+		String sort = request.getParameter("sort");
+	
 		//create mode string
 		String mode = request.getParameter("mode");
 		
@@ -71,6 +83,11 @@ public abstract class JanusController extends HttpServlet {
 		String path = request.getServletPath();
 		if(path == null) path = "";
 		path = path.toLowerCase();
+		
+		//get the query
+		String query = request.getQueryString();
+		if(query == null) query = "";
+		query = query.toLowerCase();
 		
 		//set default output type
 		OutputType outputType = OutputType.FEED;
@@ -144,13 +161,14 @@ public abstract class JanusController extends HttpServlet {
 		response.setCharacterEncoding("UTF8");		
 		
 		//do action
+		JanusResponse janusResponse = null;
 		try {
-			this.janusAction(request, response, out, mode);
+			janusResponse = this.janusAction(request, response, out, mode);
 		} catch (Exception ex) {
 			//end benchmark
 			long end = (new Date()).getTime();
 			
-			this.logger.error("Servlet failed: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent=\"{}\")",new Object[]{Long.toString((end-start)),path,request.getQueryString(),mode,outputType.toString(),type,userAgent});
+			this.logger.error("Servlet failed: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent=\"{}\")",new Object[]{Long.toString((end-start)),path,query,mode,outputType.toString(),type,userAgent});
 			
 			//print stack trace
 			ex.printStackTrace();			
@@ -166,6 +184,10 @@ public abstract class JanusController extends HttpServlet {
 		}
 
 		String output = out.toString();
+		
+		//log output
+		this.logger.debug("\nInitial XML Output: \n{}\n", output);
+		
 		//transform to json and output now, if exists
 		if(OutputType.JSON.equals(outputType)) {
 			//get output as string
@@ -191,14 +213,14 @@ public abstract class JanusController extends HttpServlet {
 			
 			try {
 				//create temlate map
-				Map<String,Object> root = new HashMap<String, Object>();
-				//use html template with xml message as input
+				Map<String,Object> root = new HashMap<String, Object>(10);
 			
+				//use html template with xml message as input
 				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder builder = factory.newDocumentBuilder();
 				
 				InputSource is = new InputSource(new StringReader(outputXML));
-				
+								
 				Document document = builder.parse(is);
 				
 				Node node = document.getDocumentElement();
@@ -210,26 +232,58 @@ public abstract class JanusController extends HttpServlet {
 				root.put("mode", mode);
 				//output writer
 				Writer htmlOut = new StringWriter();
-				//hit template
-				//todo: clean this up a bit... it should use a more sophisticated system (prefix perhaps) to get the template.  it should
-				//not rely on this very strange multi-tier structure.
-				if("book".equals(type)){
-					if("mobile".equals(mode)) {
-						TemplateController.INSTANCE.process(htmlOut, root, "mobile/entry.ftl");
-					} else if("epaper".equals(mode)) {
-						TemplateController.INSTANCE.process(htmlOut, root, "simple/entry.ftl");
-					} else {
-						TemplateController.INSTANCE.process(htmlOut, root, "simple/entry.ftl");
-					}
-				} else {
-					if("mobile".equals(mode)) {
-						TemplateController.INSTANCE.process(htmlOut, root, "mobile/feed.ftl");
-					} else if("epaper".equals(mode)) {
-						TemplateController.INSTANCE.process(htmlOut, root, "simple/feed.ftl");
-					} else {
-						TemplateController.INSTANCE.process(htmlOut, root, "simple/feed.ftl");
-					}
+				//decide on template type
+				String template = "feed";
+				if("book".equals(type)) {
+					template = "entry";
 				}
+				
+				//get template root
+				String htmlType = "enhanced";
+				if("mobile".equals(mode)) {
+					htmlType = "mobile";
+				} else if("epaper".equals(mode)) {
+					htmlType = "simple";
+				} 
+				
+				//put other useful values in template controller
+				root.put("path", path);
+				root.put("query", query);
+				if(previousPath != null && !previousPath.isEmpty()) {
+					root.put("previousPath", previousPath);
+					root.put("previousQuery", "?" + previousQuery);
+				}
+				
+				root.put("type", htmlType);
+				if(sort != null) {
+					root.put("sort", sort);
+				}
+				
+				//get response values from other pages
+				if(janusResponse != null) {
+					int currentIndex = janusResponse.getCurrentIndex();
+					int pageSize = janusResponse.getPageSize();
+					int total = janusResponse.getItems();
+					
+					if(currentIndex < 0) {
+						currentIndex = 0;
+					}
+					
+					//calculate pages if pages exist
+					if(pageSize < total) {
+						int pages = (int)Math.ceil((total / (pageSize * 1.0f))) - 1;
+						int page = currentIndex / pageSize;
+						
+						//put in templates model
+						root.put("currentPage", new Integer(page));
+						root.put("totalPages", new Integer(pages));
+						root.put("pageSize", new Integer(pageSize));
+					}
+				} 
+				
+				//process template
+				TemplateController.INSTANCE.process(htmlOut, root, htmlType + "/" + template + ".ftl");
+				
 				//recover string from output writer
 				outputHTML = htmlOut.toString();
 			} catch (SAXException e) {
@@ -254,17 +308,21 @@ public abstract class JanusController extends HttpServlet {
 		//set output size in bytes
 		response.setContentLength(output.getBytes().length);
 		
-		//write output of json and flush
+		//write output of xml/json/html and flush
 		Writer responseWriter = response.getWriter();
 		responseWriter.write(output);
 		responseWriter.flush();
+		
+		//save these values to session
+		request.getSession().setAttribute(JanusController.PREVIOUS_PATH_KEY, path);
+		request.getSession().setAttribute(JanusController.PREVIOUS_QUERY_KEY, query);
 		
 		//end benchmark
 		long end = (new Date()).getTime();
 		
 		//finally output for metrics
-		this.logger.info("Servlet took: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent=\"{}\")",new Object[]{Long.toString((end-start)),path,request.getQueryString(),mode,outputType.toString(),type,userAgent});
+		this.logger.info("Servlet took: {}ms (path={}, query=\"{}\", mode={}, output={}, type={}, useragent=\"{}\")",new Object[]{Long.toString((end-start)),path,query,mode,outputType.toString(),type,userAgent});
 	}
 
-	protected abstract void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException;	
+	protected abstract JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException;	
 }

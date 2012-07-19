@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.model.sections.Section;
 import com.em.janus.template.TemplateController;
 
@@ -27,7 +28,7 @@ public class ListTagSectionsController extends JanusController {
 	private static final long serialVersionUID = 1L;
  
 	@Override
-	protected void janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//sort mode (only name sorting is allowed)		
 		String sort = "name";
 		
@@ -38,7 +39,7 @@ public class ListTagSectionsController extends JanusController {
 		Map<String,Section<Tag>> sections = Section.generateAlphabeticalSections();
 		
 		Section<Tag> other = new Section<Tag>();
-		other.setName("Tags with numbers or special characters");
+		other.setName("Starting with numbers or special characters");
 		other.setId("OTHER");
 		
 		//begin putting authors in given sections
@@ -78,6 +79,10 @@ public class ListTagSectionsController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/tag_sections.ftl");		
+		
+		JanusResponse janusResponse = new JanusResponse();
+		
+		return janusResponse;
 	}
 
 }

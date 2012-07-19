@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Author;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.model.sections.Section;
 import com.em.janus.model.sorting.AuthorNameComparator;
 import com.em.janus.template.TemplateController;
@@ -29,7 +30,7 @@ public class ListAuthorSectionsController extends JanusController {
 	private static final long serialVersionUID = 1L;
  
 	@Override
-	protected void janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//sort mode
 		String sort = request.getParameter("sort");
 		if(sort == null || sort.isEmpty()) sort = "name";
@@ -40,6 +41,10 @@ public class ListAuthorSectionsController extends JanusController {
 		//get section map
 		Map<String,Section<Author>> sections = Section.generateAlphabeticalSections();
 		
+		Section<Author> other = new Section<Author>();
+		other.setName("Starting with numbers or special characters");
+		other.setId("OTHER");
+		
 		//begin putting authors in given sections
 		for(Author author : authors) {
 			String value = author.getName();
@@ -48,7 +53,11 @@ public class ListAuthorSectionsController extends JanusController {
 			} 
 			String first = value.substring(0, 1);
 			Section<Author> target = sections.get(first);
-			target.getContents().add(author);
+			if(target != null) {
+				target.getContents().add(author);
+			} else {
+				other.getContents().add(author);
+			}
 		}
 		
 		//comparator
@@ -66,6 +75,17 @@ public class ListAuthorSectionsController extends JanusController {
 		//create list of sections and sort, by string
 		List<Section<Author>> authorSections = new ArrayList<Section<Author>>(sections.values());
 		Collections.sort(authorSections);
+
+		//add other section if it has contents
+		if(other.getContents().size() > 0) {
+			if("sort".equalsIgnoreCase(sort)) {
+				Collections.sort(other.getContents());
+			} else {
+				Collections.sort(other.getContents(), comparator);
+			}
+			Collections.sort(other.getContents());
+			authorSections.add(0,other);
+		}
 		
 		//template object map
 		Map<String, Object> elements = new HashMap<String, Object>();
@@ -75,8 +95,13 @@ public class ListAuthorSectionsController extends JanusController {
 		elements.put("mode",mode);
 		elements.put("sort",sort);
 		
+		//create response
+		JanusResponse janusResponse = new JanusResponse();
+		
 		//process template into output stream
-		TemplateController.INSTANCE.process(out, elements, "xml/author_sections.ftl");		
+		TemplateController.INSTANCE.process(out, elements, "xml/author_sections.ftl");
+		
+		return janusResponse;
 	}
 
 }

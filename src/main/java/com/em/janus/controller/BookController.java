@@ -18,6 +18,7 @@ import com.em.janus.model.Book;
 import com.em.janus.model.FileInfo;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.template.TemplateController;
 
 /**
@@ -29,7 +30,7 @@ public class BookController extends JanusController {
 	private static final long serialVersionUID = 1L;
        
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 
 		//get id
 		String idString = request.getParameter("id");
@@ -38,8 +39,11 @@ public class BookController extends JanusController {
 			id = Integer.parseInt(idString);
 		} catch (Exception ex) {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			return;
+			return null;
 		}
+		
+		//create response
+		JanusResponse janusResponse = new JanusResponse();
 		
 		//get book
 		Book book = DAOFactory.INSTANCE.getDAO(Book.class).getByBookId(id).iterator().next();
@@ -57,10 +61,12 @@ public class BookController extends JanusController {
 		//book id and node
 		elements.put("book", book);
 		elements.put("mode", mode);
-		elements.put("files",ebookFiles);
+		elements.put("files", ebookFiles);
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/book.ftl");
+		
+		return janusResponse;
 	}
 
 }

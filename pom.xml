@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
-			<version>2.3.18</version>
+			<version>2.3.19</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -57,6 +57,10 @@
 				<exclusion>
 					<artifactId>maven-cobertura-plugin</artifactId>
 					<groupId>maven-plugins</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>icu4j</artifactId>
+					<groupId>com.ibm.icu</groupId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -103,7 +107,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.1</version>
+			<version>2.4</version>
 		</dependency>
 
 		<!-- caching -->		

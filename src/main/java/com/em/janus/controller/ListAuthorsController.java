@@ -21,6 +21,8 @@ import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
+import com.em.janus.model.sections.Section;
 import com.em.janus.model.sorting.AuthorBookCountComparator;
 import com.em.janus.model.sorting.AuthorNameComparator;
 import com.em.janus.model.sorting.AuthorSeriesCountComparator;
@@ -36,7 +38,7 @@ public class ListAuthorsController extends JanusController {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//get configuration
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
@@ -148,6 +150,32 @@ public class ListAuthorsController extends JanusController {
 				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).getBySeriesId(seriesId));
 			} else if(tagId > 0) {
 				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).getByTagId(tagId));
+			} else if("OTHER".equalsIgnoreCase(starts)) {
+				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).get());
+				
+				//create other section
+				Section<Author> other = new Section<Author>();
+				other.setName("Starting with numbers or special characters");
+				other.setId("OTHER");
+				
+				//sort out again, looking for "others" with same method that the controller used.
+				Map<String,Section<Tag>> sections = Section.generateAlphabeticalSections();
+				
+				for(Author a : authors) {
+					String value = null;
+					if("name".equals(sort)) {
+					 	value = a.getName();
+					} else {							
+						value = a.getSortName();
+					}
+					String first = value.substring(0, 1);
+					Section<Tag> section = sections.get(first);
+					if(section == null) {
+						other.getContents().add(a);
+					}
+				}
+				
+				authors = new ArrayList<Author>(other.getContents());
 			} else {
 				//otherwise, get all authors
 				authors = new ArrayList<Author>(DAOFactory.INSTANCE.getDAO(Author.class).queryStartsWith(sort, starts));
@@ -170,6 +198,9 @@ public class ListAuthorsController extends JanusController {
 			author.setTags(DAOFactory.INSTANCE.getDAO(Tag.class).getByAuthorId(author.getId()));
 		}
 		
+		//create response
+		JanusResponse janusResponse = new JanusResponse();
+		
 		//put elements into template map
 		elements.put("authors",authors);
 		elements.put("mode",mode);
@@ -177,7 +208,9 @@ public class ListAuthorsController extends JanusController {
 		elements.put("tag",tagId);
 		
 		//process template into output stream
-		TemplateController.INSTANCE.process(out, elements, "xml/authors.ftl");		
+		TemplateController.INSTANCE.process(out, elements, "xml/authors.ftl");
+		
+		return janusResponse;
 	}
        
  

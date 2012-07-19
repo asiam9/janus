@@ -20,6 +20,8 @@ import com.em.janus.dao.DAOFactory;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
+import com.em.janus.model.response.JanusResponse;
+import com.em.janus.model.sections.Section;
 import com.em.janus.model.sorting.SeriesBookCountComparator;
 import com.em.janus.model.sorting.SeriesRecentlyAddedComparator;
 import com.em.janus.template.TemplateController;
@@ -33,7 +35,7 @@ public class ListSeriesController extends JanusController {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
 		//get configuration
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
@@ -107,7 +109,7 @@ public class ListSeriesController extends JanusController {
 			//when no "sort" parameter is provided
 			if(comparator != null) {
 				//sort using comparator
-				Collections.sort(series,comparator);
+				Collections.sort(series, comparator);
 			} else {
 				Collections.sort(series);
 			}
@@ -131,7 +133,29 @@ public class ListSeriesController extends JanusController {
 			
 			//add index and size back to template
 			elements.put("index", index);
-			elements.put("size",size);			
+			elements.put("size",size);
+		} else if("OTHER".equalsIgnoreCase(starts)) {
+			series = new ArrayList<Series>(DAOFactory.INSTANCE.getDAO(Series.class).get());
+			
+			//create other section
+			Section<Series> other = new Section<Series>();
+			other.setName("Starting with numbers or special characters");
+			other.setId("OTHER");
+			
+			//sort out again, looking for "others" with same method that the controller used.
+			Map<String,Section<Series>> sections = Section.generateAlphabeticalSections();
+			
+			for(Series s : series) {
+				String value = s.getSortName();
+				String first = value.substring(0, 1);
+				Section<Series> section = sections.get(first);
+				if(section == null) {
+					other.getContents().add(s);
+				}
+			}
+			
+			series = new ArrayList<Series>(other.getContents());
+			Collections.sort(series);			
 		} else {
 			//get authors
 			series = new ArrayList<Series>(DAOFactory.INSTANCE.getDAO(Series.class).queryStartsWith(sort, starts));
@@ -153,6 +177,10 @@ public class ListSeriesController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/series_list.ftl");		
+		
+		JanusResponse janusResponse = new JanusResponse();
+		
+		return janusResponse;
 	}
        
  

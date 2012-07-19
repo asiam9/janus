@@ -2,6 +2,7 @@ package com.em.janus.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 
 import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.ServletContext;
@@ -62,6 +63,12 @@ public class EmailServlet extends HttpServlet{
 		
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
+		Enumeration<String> e = request.getAttributeNames();
+		while(e.hasMoreElements()) {
+			String s = e.nextElement();
+			System.out.println("!!!" + s);
+		}
+		
 		//get email properties from config
 		String from = config.getEmailFrom();
 		String smtp = config.getSmtp();
@@ -76,13 +83,13 @@ public class EmailServlet extends HttpServlet{
 		ssl = "ssl".equalsIgnoreCase(security);
 		tls = "tls".equalsIgnoreCase(security);
 		
-		//target email address
-		String to = request.getParameter("to");
-		if(to == null || to.isEmpty()) {
-			this.logger.error("No 'to' address specified.  No email sent.");
-			return;
+		//get if this is an ajax call or not
+		String ajaxString = request.getParameter("ajax");
+		boolean ajax = false;
+		if("true".equalsIgnoreCase(ajaxString)) {
+			ajax = true;
 		}
-		
+
 		//get id
 		String idString = request.getParameter("id");
 		int id = 0;
@@ -90,20 +97,56 @@ public class EmailServlet extends HttpServlet{
 			id = Integer.parseInt(idString);
 		} catch (Exception ex) {
 			this.logger.error("Invalid ID or ID not found.  No email sent.");
+
+			if(ajax) {
+				//respond
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("fail");
+				response.getWriter().flush();
+			}
+			
 			return;
 		}
 		
-		this.logger.debug("to={} and id={}",to,id);
+		//target email address
+		String to = request.getParameter("to");
+		if(to == null || to.isEmpty()) {
+			this.logger.error("No 'to' address specified.  No email sent.");
 
-		//we only email .mobi files (for now)
-		String ext = "mobi";
+			if(ajax) {
+				//respond
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("fail");
+				response.getWriter().flush();
+			}
+			
+			return;
+		}
 		
+		String ext = request.getParameter("ext");
+		if(ext == null || ext.isEmpty()) {
+			ext = "mobi";
+		} else {
+			//if it starts with a ".", chop it
+			if(ext.startsWith(".")) {
+				ext = ext.substring(1);
+			}
+		}
+		
+		this.logger.info("to={}, id={}, ext={}", new Object[]{to,id,ext});
+
 		//get the file from the file access object
 		FileInfo fileInfo = BookFilesAO.INSTANCE.getBookFile(context, DAOFactory.INSTANCE.getDAO(Book.class), id, ext);
 		
 		//if something is wrong with the file, then bail with a 404
 		if(fileInfo.getFile() == null || fileInfo.getFile().isDirectory() || fileInfo.getFile().length() == 0) {
 			this.logger.error("File not found, file is directory, or the file is empty.  No email sent.");
+			
+			//an exception was caught, do not redirect, but throw it back as a 404.
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.getWriter().write("fail");
+			response.getWriter().flush();
+			
 			return;
 		}
 
@@ -126,7 +169,7 @@ public class EmailServlet extends HttpServlet{
 		//add attachment
 		email.addAttachment(file.getName(), fileBytes, fileInfo.getMimeType());
 		
-		this.logger.debug("Mail for '" + to + "' created with file '" + file.getName() + "' and ready to send.");
+		this.logger.debug("Mail for '{}' created with file '{}' (mime type = '{}') and ready to send.", new Object[]{to, file.getName(), fileInfo.getMimeType()});
 		
 		//choose transport strategy based on security
 		TransportStrategy transport = TransportStrategy.SMTP_PLAIN;
@@ -158,11 +201,25 @@ public class EmailServlet extends HttpServlet{
 		} catch (Exception ex) {
 			this.logger.error("Could not send mail to '{}'",to,ex);
 			send = "fail";
+			
+			//if an error occurs, fail
+			if(ajax) {
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.getWriter().write("fail");
+				response.getWriter().flush();
+				return;
+			}
 		}
 		
 		//regardless, return
-		String referer = request.getHeader("Referer");
-		response.sendRedirect(referer + "?send=" + send);		
+		if(ajax) {
+			response.setStatus(HttpServletResponse.SC_OK);
+			response.getWriter().write("ok");
+			response.getWriter().flush();
+		} else {
+			String referer = request.getHeader("Referer");
+			response.sendRedirect(referer + "?send=" + send);
+		}
 	}	
 	
 }

@@ -21,14 +21,8 @@
 		</author>
 		</#list>
 		<updated>${book.lastModified?date}</updated>
-	    <content type="text/html">
-			<strong>Tags:</strong>
-			<#list book.tags as tag>${tag.name?xml} </#list>
-			<br />
-			<strong>Series:</strong>
-			Book ${book.seriesIndex?string.number} in the <#list book.series as series>${series.name?xml}</#list> series
-			<br />
-	    </content>
+		<#assign comment=book.calibreComments!""/>
+	    <content type="text/html">${comment?xml}</content>
 	    
 	    <#list files as fi>
 	    <#if fi.mimeType??>
@@ -44,6 +38,7 @@
 		<link href="./author.xml?id=${author.id?c}&amp;mode=${mode}" type="application/atom+xml;type=feed;profile=opds-catalog" rel="related" title="Other books by ${author.name?xml}" />
 		</#list>
 		<#list book.tags as tag>
+		<tag><id>${tag.id?c}</id><name>${tag.name}</name></tag>
 		<link href="./tag.xml?id=${tag.id?c}&amp;mode=${mode}" type="application/atom+xml;type=feed;profile=opds-catalog" rel="related" title="Other titles with the tag '${tag.name}'" />
 		</#list>
 	</entry>

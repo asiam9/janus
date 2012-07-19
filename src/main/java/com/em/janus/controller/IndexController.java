@@ -15,6 +15,7 @@ import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
 import com.em.janus.model.Tag;
+import com.em.janus.model.response.JanusResponse;
 import com.em.janus.template.TemplateController;
 
 /**
@@ -25,7 +26,7 @@ public class IndexController extends JanusController {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	protected void janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode)	throws ServletException, IOException {
+	protected JanusResponse janusAction(HttpServletRequest request,	HttpServletResponse response, Writer out, String mode)	throws ServletException, IOException {
 		//template object map
 		Map<String, Object> elements = new HashMap<String, Object>();
 		
@@ -59,8 +60,13 @@ public class IndexController extends JanusController {
 		elements.put("index", index);
 		elements.put("size", size);
 		
+		//create response
+		JanusResponse janusResponse = new JanusResponse();
+		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/index.ftl");
+		
+		return janusResponse;
 	}
 	
 }
