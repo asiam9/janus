@@ -55,46 +55,68 @@
 				<!-- title -->
     			<h2>${feed.title[0]?html}</h2>
 			</header>
-
-			<!-- paging row -->
-			<div class='row'>
-   				<!-- pages -->
-    			<#assign totalPages=totalPages!0/>
-    			<#assign currentPage=currentPage!0/>
-    			<#assign pageSize=pageSize!0/>
-    			<#assign sort=sort!"none"/>
+			
+			<#assign totalPages=totalPages!0/>
+    		<#assign currentPage=currentPage!0/>
+    		<#assign pageSize=pageSize!0/>
+    		<#assign sort=sort!"none"/>
+			<#assign longCutOff=10/>
+			<#assign paginationContent>
     			<#if totalPages &gt; 0>
-					<div class="pagination">
-						<ul class="hidden-phone pull-right">
+					<div class="pagination pagination-centered">
+						<ul class="hidden-phone">
 							<!-- if not on the first page, show first arrow -->
-						  	<#if currentPage &gt; 0><li><a alt="first" href=".${path}?mode=enhanced&index=0&size=${pageSize}&sort=${sort}">&laquo;</a></li></#if>
-						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${pageSize * (currentPage - 1)}&sort=${sort}">&lt;</a></li></#if>
+						  	<#if currentPage &gt; 0><li><a alt="first" href=".${path}?mode=enhanced&index=0&size=${pageSize?c}&sort=${sort}">&laquo;</a></li></#if>
+						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${(pageSize * (currentPage - 1))?c}&sort=${sort}">&lt;</a></li></#if>
 						  	<!-- list pages -->
+						  	<#assign firstFifthMark=false/>
+						  	<#assign fourthFifthMark=false/>
+						  	<#assign markCount = -1/>
 						  	<#list 0..totalPages as page>
 						  	<#if currentPage == page>
-								<li class="active"><a href="#">${page + 1}</a></li>
+						  		<li class="active"><a href="#">${page + 1}</a></li>
 							<#else>
-								<li><a href=".${path}?mode=enhanced&index=${page * pageSize}&size=${pageSize}&sort=${sort}">${page+1}</a></li>
+						  		<#if totalPages &gt; longCutOff && page &gt; totalPages * 0.15 && page &lt; totalPages * 0.45>
+						  			<#if !firstFifthMark>
+						  				<#assign firstFifthMark=true/>
+						  				<li class="disabled"><a href="#">...</a></li>
+						  			</#if>
+						  			<#assign markCount = page>
+								<#elseif totalPages &gt; longCutOff && page &gt; totalPages * 0.55 && page &lt; totalPages * 0.85>
+							 		<#if !fourthFifthMark>
+						  				<#assign fourthFifthMark=true/>
+						  				<#if markCount != page - 1 && markCount != page>
+						  				<li class="disabled"><a href="#">...</a></li>
+						  				</#if>
+						  			</#if>
+						  		<#else>							
+									<li><a href=".${path}?mode=enhanced&index=${(page * pageSize)?c}&size=${pageSize?c}&sort=${sort}">${page+1}</a></li>
+								</#if>
 							</#if>
 							</#list>
 							<!-- if not on the last page, show end arrow -->
-							<#if currentPage &lt; totalPages - 1><li><a alt="next" href=".${path}?mode=enhanced&index=${pageSize * (currentPage + 1)}&size=${pageSize}&sort=${sort}">&gt;</a></li></#if>
-						  	<#if currentPage &lt; totalPages><li><a alt="last" href=".${path}?mode=enhanced&index=${pageSize * (totalPages)}&size=${pageSize}&sort=${sort}">&raquo;</a></li></#if>
+							<#if currentPage &lt; totalPages - 1><li><a alt="next" href=".${path}?mode=enhanced&index=${(pageSize * (currentPage + 1))?c}&size=${pageSize?c}&sort=${sort}">&gt;</a></li></#if>
+						  	<#if currentPage &lt; totalPages><li><a alt="last" href=".${path}?mode=enhanced&index=${(pageSize * (totalPages))?c}&size=${pageSize?c}&sort=${sort}">&raquo;</a></li></#if>
 						</ul>
 						<ul class="visible-phone">
 							<!-- if not on the first page, show first arrow -->
-						  	<#if currentPage &gt; 0><li><a href=".${path}?mode=enhanced&index=0&size=${pageSize}&sort=${sort}">&laquo;</a></li></#if>
-						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${pageSize * (currentPage - 1)}&sort=${sort}">&lt;</a></li></#if>
+						  	<#if currentPage &gt; 0><li><a href=".${path}?mode=enhanced&index=0&size=${pageSize?c}&sort=${sort}">&laquo;</a></li></#if>
+						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${(pageSize * (currentPage - 1))?c}&size=${pageSize?c}&sort=${sort}">&lt;</a></li></#if>
 						  	<!-- current page --> 
 							<li class="active"><a href="#">${currentPage + 1} of ${totalPages + 1}</a></li>
 							<!-- if not on the last page, show end arrow -->
-							<#if currentPage &lt; totalPages - 1><li><a alt="next" href=".${path}?mode=enhanced&index=${pageSize * (currentPage + 1)}&size=${pageSize}&sort=${sort}">&gt;</a></li></#if>
-						  	<#if currentPage &lt; totalPages><li><a alt="last" href=".${path}?mode=enhanced&index=${pageSize * (totalPages)}&size=${pageSize}&sort=${sort}">&raquo;</a></li></#if>
+							<#if currentPage &lt; totalPages - 1><li><a alt="next" href=".${path}?mode=enhanced&index=${(pageSize * (currentPage + 1))?c}&size=${pageSize?c}&sort=${sort}">&gt;</a></li></#if>
+						  	<#if currentPage &lt; totalPages><li><a alt="last" href=".${path}?mode=enhanced&index=${(pageSize * (totalPages))?c}&size=${pageSize?c}&sort=${sort}">&raquo;</a></li></#if>
 						</ul>						
 					</div>
 				<#else>
 					<br/>									
-				</#if>			
+				</#if>					
+			</#assign>
+
+			<!-- paging row -->
+			<div class='row'>
+				${paginationContent}	
 			</div>
 
 			<!-- actual row -->
@@ -124,9 +146,15 @@
 											<td valign='top' style='padding-left: 15px;'>
 												<!-- show link to entry -->
 												<#if link?size &gt; 0>
-												<a href="${link[0].@href?replace(".xml",".html")?html}"><h3>${entry.title[0]?html}</h3></a>
+												<h3>${entry.title[0]?html}</h3>
 												<#elseif book?size &gt; 0>
-												<a href="${book[0].@href?replace(".xml",".html")?html}&amp;type=book"><h3>${entry.title[0]?html}</h3></a>
+												<#if entry.title[0]?contains(":")>
+												<#assign titleHeader>${entry.title[0]?substring(0,entry.title[0]?index_of(":"))?html}</#assign>
+												<#assign subtitleHeader>${entry.title[0]?substring(entry.title[0]?last_index_of(":")+1)?html}</#assign>
+													<h3>${titleHeader}</h3><h6>${subtitleHeader}</h6>
+												<#else>
+													<h3>${entry.title[0]?html}</h3>
+												</#if>												
 												<#else>
 												</#if>
 												<!-- description -->
@@ -150,38 +178,9 @@
 			
 			<!-- stuff under the table -->
 			<div class='row'>
-			<!-- pagination, again -->
-				<#if totalPages &gt; 0>
-					<div class="pagination">
-						<ul class="hidden-phone pull-right">
-							<!-- if not on the first page, show first arrow -->
-						  	<#if currentPage &gt; 0><li><a alt="first" href=".${path}?mode=enhanced&index=0&size=${pageSize}&sort=${sort}">&laquo;</a></li></#if>
-						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${pageSize * (currentPage - 1)}&sort=${sort}">&lt;</a></li></#if>
-						  	<!-- list pages -->
-						  	<#list 0..totalPages as page>
-						  	<#if currentPage == page>
-								<li class="active"><a href="#">${page + 1}</a></li>
-							<#else>
-								<li><a href=".${path}?mode=enhanced&index=${page * pageSize}&size=${pageSize}&sort=${sort}">${page+1}</a></li>
-							</#if>
-							</#list>
-							<!-- if not on the last page, show end arrow -->
-							<#if currentPage &lt; totalPages - 1><li><a alt="next" href=".${path}?mode=enhanced&index=${pageSize * (currentPage + 1)}&size=${pageSize}&sort=${sort}">&gt;</a></li></#if>
-						  	<#if currentPage &lt; totalPages><li><a alt="last" href=".${path}?mode=enhanced&index=${pageSize * (totalPages)}&size=${pageSize}&sort=${sort}">&raquo;</a></li></#if>
-						</ul>
-						<ul class="visible-phone">
-							<!-- if not on the first page, show first arrow -->
-						  	<#if currentPage &gt; 0><li><a href=".${path}?mode=enhanced&index=0&size=${pageSize}&sort=${sort}">&laquo;</a></li></#if>
-						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${pageSize * (currentPage - 1)}&sort=${sort}">&lt;</a></li></#if>
-						  	<!-- current page --> 
-							<li class="active"><a href="#">${currentPage + 1} of ${totalPages + 1}</a></li>
-							<!-- if not on the last page, show end arrow -->
-							<#if currentPage &lt; totalPages - 1><li><a alt="next" href=".${path}?mode=enhanced&index=${pageSize * (currentPage + 1)}&size=${pageSize}&sort=${sort}">&gt;</a></li></#if>
-						  	<#if currentPage &lt; totalPages><li><a alt="last" href=".${path}?mode=enhanced&index=${pageSize * (totalPages)}&size=${pageSize}&sort=${sort}">&raquo;</a></li></#if>
-						</ul>						
-					</div>
-				</#if>
-			</div>			
+				${paginationContent}	
+			</div>
+
     	</div> <!-- /container -->
 	
 		<!-- bootstrap standard says place stuff at the end of the body -->

@@ -3,6 +3,9 @@ package com.em.janus.dao;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.em.janus.config.JanusConfiguration;
 import com.em.janus.dao.cache.InfinispanCachedDAO;
 import com.em.janus.dao.cache.NaiveCachedDAO;
@@ -20,6 +23,8 @@ import com.em.janus.model.Tag;
 public enum DAOFactory {
 
 	INSTANCE;
+	
+	private Logger log = LoggerFactory.getLogger(DAOFactory.class);
 	
 	private JanusConfiguration config = null;
 	
@@ -80,7 +85,9 @@ public enum DAOFactory {
 	
 	@SuppressWarnings("unchecked")
 	public <T extends Entity> IDataAccessObject<T> getDAO(Class<T> forClass) {
-		return (IDataAccessObject<T>)this.factoryMap.get(forClass);
+		IDataAccessObject<T> dao = (IDataAccessObject<T>)this.factoryMap.get(forClass);
+		this.log.debug("Using DAO Class: {} for {}", dao.getClass(), forClass.getName());
+		return dao;
 	}
 		
 }

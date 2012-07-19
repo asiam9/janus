@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.em.janus.config.JanusConfiguration;
 import com.em.janus.config.ServletConfigUtility;
 import com.em.janus.dao.DAOFactory;
+import com.em.janus.dao.IDataAccessObject;
 import com.em.janus.model.Author;
 import com.em.janus.model.Book;
 import com.em.janus.model.Series;
@@ -39,6 +40,8 @@ public class ListBooksController extends JanusController {
   
 	@Override
 	protected JanusResponse janusAction(HttpServletRequest request, HttpServletResponse response, Writer out, String mode) throws ServletException, IOException {
+		IDataAccessObject<Book> bookDAO = DAOFactory.INSTANCE.getDAO(Book.class);
+		
 		//get configuration
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
@@ -84,11 +87,11 @@ public class ListBooksController extends JanusController {
 		//get books
 		Set<Book> books = null;
 		if(tagId > 0) {
-			books = DAOFactory.INSTANCE.getDAO(Book.class).getByTagId(tagId);
+			books = bookDAO.getByTagId(tagId);
 		} else if(startsWith == null) {
-			books = DAOFactory.INSTANCE.getDAO(Book.class).get();
+			books = bookDAO.get();
 		} else if("OTHER".equalsIgnoreCase(startsWith)) {
-			books = DAOFactory.INSTANCE.getDAO(Book.class).get();
+			books = bookDAO.get();
 
 			//sort out again, looking for "others" with same method that the controller used.
 			Map<String,Section<Book>> sections = Section.generateAlphabeticalSections();
@@ -110,7 +113,7 @@ public class ListBooksController extends JanusController {
 			//populate books with "other" before continuing
 			books = new HashSet<Book>(other.getContents());
 		} else {
-			books = DAOFactory.INSTANCE.getDAO(Book.class).queryStartsWith("sort", startsWith);
+			books = bookDAO.queryStartsWith("sort", startsWith);
 		}
 		List<Book> sorted = new ArrayList<Book>(books);
 		

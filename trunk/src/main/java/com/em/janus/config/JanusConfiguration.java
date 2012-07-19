@@ -23,7 +23,7 @@ public class JanusConfiguration {
 	private List<String> ebookExtensions = new ArrayList<String>();
 	
 	//cache mechanism
-	private String cacheProvider = "EH";
+	private String cacheProvider = "INFINISPAN";
 
 	//page size
 	private int pageSize = 50;
