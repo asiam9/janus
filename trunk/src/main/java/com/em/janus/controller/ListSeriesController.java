@@ -39,6 +39,8 @@ public class ListSeriesController extends JanusController {
 		//get configuration
 		JanusConfiguration config = ServletConfigUtility.getConfigurationFromContext(request.getServletContext());
 		
+		JanusResponse janusResponse = new JanusResponse();
+		
 		//sort mode
 		String sort = request.getParameter("sort");
 		//sort is a potential SQL injection problem.  it must equal "name" or "books" or "date"
@@ -113,6 +115,11 @@ public class ListSeriesController extends JanusController {
 			} else {
 				Collections.sort(series);
 			}
+			
+			//set up response
+			janusResponse.setItems(series.size());
+			janusResponse.setPageSize(size);
+			janusResponse.setCurrentIndex(index);
 				
 			//grab size
 			int end = index + size;
@@ -134,6 +141,7 @@ public class ListSeriesController extends JanusController {
 			//add index and size back to template
 			elements.put("index", index);
 			elements.put("size",size);
+			
 		} else if("OTHER".equalsIgnoreCase(starts)) {
 			series = new ArrayList<Series>(DAOFactory.INSTANCE.getDAO(Series.class).get());
 			
@@ -177,8 +185,6 @@ public class ListSeriesController extends JanusController {
 		
 		//process template into output stream
 		TemplateController.INSTANCE.process(out, elements, "xml/series_list.ftl");		
-		
-		JanusResponse janusResponse = new JanusResponse();
 		
 		return janusResponse;
 	}

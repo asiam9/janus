@@ -60,14 +60,14 @@
     		<#assign currentPage=currentPage!0/>
     		<#assign pageSize=pageSize!0/>
     		<#assign sort=sort!"none"/>
-			<#assign longCutOff=10/>
+			<#assign longCutOff=12/>
 			<#assign paginationContent>
     			<#if totalPages &gt; 0>
 					<div class="pagination pagination-centered">
 						<ul class="hidden-phone">
 							<!-- if not on the first page, show first arrow -->
 						  	<#if currentPage &gt; 0><li><a alt="first" href=".${path}?mode=enhanced&index=0&size=${pageSize?c}&sort=${sort}">&laquo;</a></li></#if>
-						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=0&size=${(pageSize * (currentPage - 1))?c}&sort=${sort}">&lt;</a></li></#if>
+						  	<#if currentPage &gt; 1><li><a alt="previous" href=".${path}?mode=enhanced&index=${(pageSize * (currentPage - 1))?c}&size=${pageSize?c}&sort=${sort}">&lt;</a></li></#if>
 						  	<!-- list pages -->
 						  	<#assign firstFifthMark=false/>
 						  	<#assign fourthFifthMark=false/>
@@ -76,13 +76,13 @@
 						  	<#if currentPage == page>
 						  		<li class="active"><a href="#">${page + 1}</a></li>
 							<#else>
-						  		<#if totalPages &gt; longCutOff && page &gt; totalPages * 0.15 && page &lt; totalPages * 0.45>
+						  		<#if totalPages &gt; longCutOff && page &gt; (longCutOff * 0.50) && page &lt; (totalPages * 0.50) - (longCutOff * 0.25) >
 						  			<#if !firstFifthMark>
 						  				<#assign firstFifthMark=true/>
 						  				<li class="disabled"><a href="#">...</a></li>
 						  			</#if>
 						  			<#assign markCount = page>
-								<#elseif totalPages &gt; longCutOff && page &gt; totalPages * 0.55 && page &lt; totalPages * 0.85>
+								<#elseif totalPages &gt; longCutOff && page &lt; totalPages - (longCutOff * 0.50) * 0.55 && page &gt; (totalPages * 0.50) + (longCutOff * 0.25)>
 							 		<#if !fourthFifthMark>
 						  				<#assign fourthFifthMark=true/>
 						  				<#if markCount != page - 1 && markCount != page>
@@ -150,7 +150,7 @@
 												<#elseif book?size &gt; 0>
 												<#if entry.title[0]?contains(":")>
 												<#assign titleHeader>${entry.title[0]?substring(0,entry.title[0]?index_of(":"))?html}</#assign>
-												<#assign subtitleHeader>${entry.title[0]?substring(entry.title[0]?last_index_of(":")+1)?html}</#assign>
+												<#assign subtitleHeader>${entry.title[0]?substring(entry.title[0]?index_of(":")+1)?html}</#assign>
 													<h3>${titleHeader}</h3><h6>${subtitleHeader}</h6>
 												<#else>
 													<h3>${entry.title[0]?html}</h3>

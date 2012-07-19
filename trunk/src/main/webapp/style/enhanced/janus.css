@@ -2,6 +2,11 @@
 	color: #333;	
 }
 
+.bookEntryImageContainer img {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
 .entryRow {
 	margin-top: 10px;
 }
